@@ -30,32 +30,38 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
       const dimensions = PLATFORM_DIMENSIONS[platform];
       const element = previewRef.current;
       
-      // Get the current element dimensions
+      // Get current element size
       const rect = element.getBoundingClientRect();
-      const scale = dimensions.width / rect.width;
+      
+      // Calculate scale factor to reach target dimensions
+      const scaleX = dimensions.width / rect.width;
+      const scaleY = dimensions.height / rect.height;
       
       const dataUrl = await toPng(element, {
         width: dimensions.width,
         height: dimensions.height,
-        pixelRatio: 1, // Reduced for smaller file size
+        canvasWidth: dimensions.width,
+        canvasHeight: dimensions.height,
+        pixelRatio: 1,
         style: {
-          transform: `scale(${scale})`,
+          transform: `scale(${scaleX}, ${scaleY})`,
           transformOrigin: "top left",
-          width: `${rect.width}px`,
-          height: `${rect.height}px`,
         },
       });
 
-      // Create download link
+      // Create and trigger download
       const link = document.createElement("a");
       link.download = `fivedrop-${platform}-${Date.now()}.png`;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
       setExportedPlatform(platform);
       setTimeout(() => setExportedPlatform(null), 2000);
     } catch (error) {
       console.error("Export failed:", error);
+      alert("Export failed. Please try again.");
     } finally {
       setIsExporting(false);
     }
@@ -64,7 +70,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
   const currentPlatform = settings.platform;
   const currentDimensions = PLATFORM_DIMENSIONS[currentPlatform];
 
-  // Recommended platforms based on current selection
+  // Platform order - square first for mobile
   const platformOrder: Platform[] = ["instagram", "instagram-story", "facebook", "linkedin", "twitter"];
   const otherPlatforms = platformOrder.filter(p => p !== currentPlatform);
 
@@ -81,7 +87,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
       <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg text-xs text-muted-foreground">
         <Smartphone className="h-4 w-4 mt-0.5 flex-shrink-0" />
         <span>
-          Images are optimized for mobile posting. Square (1:1) format works best on most platforms.
+          Images export at full resolution for crisp quality on all devices.
         </span>
       </div>
 

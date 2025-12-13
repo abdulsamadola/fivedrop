@@ -14,27 +14,22 @@ interface PreviewCanvasProps {
   settings: PostSettings;
 }
 
-// Twitter/Facebook style verified badge - smooth rounded shape
+// Twitter verified badge - exact replica
 function VerifiedBadge({ size }: { size: number }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 22 22"
+      viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Smooth rounded seal/badge shape like Twitter */}
       <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M11 0C9.735 0 8.628.632 8.016 1.6C7.228 1.143 6.296 1 5.39 1.196C4.088 1.484 3.016 2.484 2.664 3.812C2.312 5.14 2.68 6.548 3.64 7.568C2.924 8.252 2.44 9.172 2.312 10.2C2.144 11.572 2.68 12.936 3.72 13.856C3.28 14.756 3.18 15.78 3.456 16.74C3.82 18.032 4.82 19.068 6.096 19.5C6.192 20.552 6.68 21.54 7.472 22.256L7.476 22.256C8.488 23.148 9.848 23.544 11.172 23.344C11.448 23.344 11.724 23.304 12 23.252C12.276 23.304 12.552 23.344 12.828 23.344C14.152 23.544 15.512 23.148 16.524 22.256L16.528 22.256C17.32 21.54 17.808 20.552 17.904 19.5C19.18 19.068 20.18 18.032 20.544 16.74C20.82 15.78 20.72 14.756 20.28 13.856C21.32 12.936 21.856 11.572 21.688 10.2C21.56 9.172 21.076 8.252 20.36 7.568C21.32 6.548 21.688 5.14 21.336 3.812C20.984 2.484 19.912 1.484 18.61 1.196C17.704 1 16.772 1.143 15.984 1.6C15.372.632 14.265 0 13 0H11Z"
+        d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
         fill="#1D9BF0"
-        transform="translate(0, -0.5) scale(1)"
       />
-      {/* White checkmark - thin and elegant */}
       <path
-        d="M15.67 7.52L9.9 13.29L7.33 10.72C7.14 10.53 6.84 10.53 6.65 10.72C6.46 10.91 6.46 11.21 6.65 11.4L9.56 14.31C9.75 14.5 10.05 14.5 10.24 14.31L16.35 8.2C16.54 8.01 16.54 7.71 16.35 7.52C16.16 7.33 15.86 7.33 15.67 7.52Z"
+        d="M9.813 15.904L7.076 13.166c-.294-.293-.294-.768 0-1.06.293-.294.768-.294 1.06 0l2.03 2.03 4.908-4.908c.293-.293.768-.293 1.06 0 .294.294.294.769 0 1.061l-5.437 5.438c-.146.146-.338.22-.53.22-.19 0-.384-.074-.53-.22l-.824-.823z"
         fill="white"
       />
     </svg>
@@ -183,29 +178,19 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return baseSize * multiplier;
     }, [mainFontSize, settings.ctaSize]);
 
-    // Calculate max height based on platform
-    const getMaxHeight = () => {
-      if (isStory) return "550px";
-      if (isSquare) return "420px";
-      return "320px";
-    };
+    // Fixed preview dimensions for consistency
+    const previewWidth = isStory ? 240 : isSquare ? 340 : 400;
+    const previewHeight = Math.round(previewWidth / aspectRatio);
 
     return (
-      <div
-        className="w-full flex justify-center"
-        style={{
-          maxHeight: getMaxHeight(),
-        }}
-      >
+      <div className="w-full flex justify-center">
         <div
           ref={ref}
           className="preview-canvas rounded-lg overflow-hidden relative flex flex-col"
           style={{
             background,
-            aspectRatio: aspectRatio,
-            width: "100%",
-            maxWidth: isStory ? "250px" : isSquare ? "420px" : "100%",
-            height: "auto",
+            width: `${previewWidth}px`,
+            height: `${previewHeight}px`,
           }}
         >
           <div
