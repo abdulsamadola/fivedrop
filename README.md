@@ -4,7 +4,11 @@
 
 FiveDrop helps content creators transform text into beautiful, engagement-optimized images for Facebook, LinkedIn, X (Twitter), and Instagram. No design skills needed.
 
-![FiveDrop Preview](./public/og-image.png)
+**Repository**: [https://github.com/abdulsamadola/fivedrop](https://github.com/abdulsamadola/fivedrop)
+
+![FiveDrop Landing Page](./public/screenshot-landing.png)
+
+![FiveDrop Create Page](./public/screenshot-create.png)
 
 ## ✨ Features
 
@@ -19,7 +23,7 @@ FiveDrop helps content creators transform text into beautiful, engagement-optimi
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/fivedrop.git
+git clone https://github.com/abdulsamadola/fivedrop.git
 cd fivedrop
 
 # Install dependencies
