@@ -29,19 +29,23 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
     setExportedPlatform(null)
 
     try {
-      const dimensions = PLATFORM_DIMENSIONS[platform]
+      const element = previewRef.current
+      
+      // Get actual rendered size (dynamic sizing)
+      const actualWidth = element.offsetWidth
+      const actualHeight = element.offsetHeight
 
-      // Canvas is already rendered at full size, just capture it directly
-      const dataUrl = await toPng(previewRef.current, {
-        width: dimensions.width,
-        height: dimensions.height,
+      // Capture at actual size - no scaling needed
+      const dataUrl = await toPng(element, {
+        width: actualWidth,
+        height: actualHeight,
         pixelRatio: 1,
         quality: 1,
       })
 
       // Create and trigger download with descriptive filename
       const formatName = settings.format.replace('-', '_')
-      const sizeName = dimensions.aspectRatio.replace(':', 'x')
+      const sizeName = `${actualWidth}x${actualHeight}`
       const link = document.createElement('a')
       link.download = `fivedrop_${formatName}_${sizeName}_${Date.now()}.png`
       link.href = dataUrl

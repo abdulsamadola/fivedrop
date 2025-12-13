@@ -89,27 +89,27 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
           if (complexityScore < 50) main = baseWidth * 0.042
           else if (complexityScore < 80) main = baseWidth * 0.038
           else if (complexityScore < 120) main = baseWidth * 0.034
-          else if (complexityScore < 180) main = baseWidth * 0.030
+          else if (complexityScore < 180) main = baseWidth * 0.03
           else if (complexityScore < 250) main = baseWidth * 0.026
           else if (complexityScore < 350) main = baseWidth * 0.023
-          else if (complexityScore < 450) main = baseWidth * 0.020
+          else if (complexityScore < 450) main = baseWidth * 0.02
           else if (complexityScore < 600) main = baseWidth * 0.018
           else main = baseWidth * 0.016
         } else {
           // Landscape formats (1200x630) - reduced
           if (complexityScore < 50) main = baseWidth * 0.038
           else if (complexityScore < 80) main = baseWidth * 0.034
-          else if (complexityScore < 120) main = baseWidth * 0.030
+          else if (complexityScore < 120) main = baseWidth * 0.03
           else if (complexityScore < 180) main = baseWidth * 0.026
           else if (complexityScore < 250) main = baseWidth * 0.023
-          else if (complexityScore < 350) main = baseWidth * 0.020
+          else if (complexityScore < 350) main = baseWidth * 0.02
           else if (complexityScore < 450) main = baseWidth * 0.018
           else main = baseWidth * 0.016
         }
 
         // Adjust for format type
         if (settings.format === 'long-thought') {
-          main = Math.max(main * 0.90, baseWidth * 0.015)
+          main = Math.max(main * 0.9, baseWidth * 0.015)
         } else if (settings.format === 'list-drop') {
           main = Math.max(main * 0.92, baseWidth * 0.015)
         } else if (isCreatorCard) {
@@ -118,8 +118,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
         return {
           mainFontSize: Math.round(main),
-          subtitleFontSize: Math.round(Math.max(main * 0.48, baseWidth * 0.014)),
-          pointerFontSize: Math.round(Math.max(main * 0.40, baseWidth * 0.012)),
+          subtitleFontSize: Math.round(
+            Math.max(main * 0.48, baseWidth * 0.014)
+          ),
+          pointerFontSize: Math.round(Math.max(main * 0.4, baseWidth * 0.012)),
           handleFontSize: Math.round(Math.max(main * 0.36, baseWidth * 0.012)),
         }
       }, [
@@ -144,22 +146,64 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return baseSize
     }, [settings.creatorName, mainFontSize, dimensions.width])
 
-    // Determine if content is short (group elements together)
-    const isShortContent = useMemo(() => {
+    // Calculate dynamic height based on content - SMART SIZING
+    const dynamicDimensions = useMemo(() => {
+      const baseWidth = dimensions.width
       const contentLength = settings.content.length
+      const wordCount = settings.content.split(/\s+/).filter((w) => w).length
+      const lineCount = settings.content.split('\n').length
+      const hasHeader = isCreatorCard && (settings.creatorName || settings.creatorHandle)
       const hasSubtitle = !!settings.subtitle
       const hasCTA = settings.showCtaButton
       const hasPointer = settings.showCommentPointer
 
-      if (contentLength < 80 && !hasSubtitle && !hasCTA && !hasPointer)
-        return true
-      if (contentLength < 120 && !(hasSubtitle && hasCTA)) return true
-      return false
+      // Estimate content height as ratio of width
+      let heightRatio: number
+
+      // Base ratio from content complexity
+      const complexity = contentLength + wordCount * 3 + lineCount * 15
+
+      if (complexity < 50) heightRatio = 0.65
+      else if (complexity < 80) heightRatio = 0.75
+      else if (complexity < 120) heightRatio = 0.85
+      else if (complexity < 180) heightRatio = 0.95
+      else if (complexity < 250) heightRatio = 1.0
+      else if (complexity < 350) heightRatio = 1.1
+      else heightRatio = 1.2
+
+      // Add space for extras
+      if (hasHeader) heightRatio += 0.12
+      if (hasSubtitle) heightRatio += 0.08
+      if (hasCTA) heightRatio += 0.1
+      if (hasPointer) heightRatio += 0.06
+
+      // Clamp to reasonable bounds
+      heightRatio = Math.max(0.6, Math.min(1.5, heightRatio))
+
+      // For story format, don't reduce height
+      if (isStory) {
+        return { width: baseWidth, height: dimensions.height }
+      }
+
+      // For landscape, keep original
+      if (!isSquare && !isStory) {
+        return { width: baseWidth, height: dimensions.height }
+      }
+
+      // For square, make it dynamic
+      const dynamicHeight = Math.round(baseWidth * heightRatio)
+      return { width: baseWidth, height: dynamicHeight }
     }, [
+      dimensions,
       settings.content,
+      settings.creatorName,
+      settings.creatorHandle,
       settings.subtitle,
       settings.showCtaButton,
       settings.showCommentPointer,
+      isCreatorCard,
+      isSquare,
+      isStory,
     ])
 
     // Apply highlight to content
@@ -274,14 +318,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             className="preview-canvas rounded-lg overflow-hidden relative flex flex-col"
             style={{
               background,
-              width: `${dimensions.width}px`,
-              height: `${dimensions.height}px`,
+              width: `${dynamicDimensions.width}px`,
+              height: `${dynamicDimensions.height}px`,
             }}
           >
             <div
-              className={`${fontClass} h-full flex flex-col ${
-                isShortContent ? 'justify-center' : 'justify-between'
-              }`}
+              className={`${fontClass} h-full flex flex-col justify-between`}
               style={{
                 color: settings.textColor,
                 padding,
