@@ -22,7 +22,7 @@ export function Header() {
             Create
           </Link>
           <a
-            href="https://github.com/fivedrop"
+            href="https://github.com/abdulsamadola/fivedrop"
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"

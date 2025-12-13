@@ -6,7 +6,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Smile, User, ArrowDown, Upload, Link, X } from "lucide-react";
+import { MessageSquare, Smile, User, ArrowDown, Upload, Link, X, BadgeCheck } from "lucide-react";
 import { CTA_SIZES, type PostSettings, type CtaSize } from "@/lib/types";
 
 interface ContentInputProps {
@@ -165,10 +165,7 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
 
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 22 22" fill="none">
-                <circle cx="11" cy="11" r="10" fill="#1D9BF0"/>
-                <path d="M9.64 15.67l-3.64-3.64 1.41-1.41 2.23 2.23 5.23-5.23 1.41 1.41-6.64 6.64z" fill="white"/>
-              </svg>
+              <BadgeCheck className="h-4 w-4 fill-[#1D9BF0] text-white" />
               <span className="text-sm">Verified Badge</span>
             </div>
             <Toggle
