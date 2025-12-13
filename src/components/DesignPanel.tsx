@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   Select,
@@ -6,8 +6,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   FONT_INFO,
   GRADIENT_PRESETS,
@@ -18,11 +18,11 @@ import {
   type GradientPreset,
   type Platform,
   type PostSettings,
-} from "@/lib/types";
+} from '@/lib/types'
 
 interface DesignPanelProps {
-  settings: PostSettings;
-  onSettingsChange: (settings: Partial<PostSettings>) => void;
+  settings: PostSettings
+  onSettingsChange: (settings: Partial<PostSettings>) => void
 }
 
 export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
@@ -30,7 +30,9 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
     <div className="space-y-6">
       {/* Font Selection */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Font Style</label>
+        <label className="text-sm font-medium text-foreground">
+          Font Style
+        </label>
         <Select
           value={settings.fontFamily}
           onValueChange={(value: FontFamily) =>
@@ -52,7 +54,9 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
 
       {/* Platform Selection */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Platform Size</label>
+        <label className="text-sm font-medium text-foreground">
+          Platform Size
+        </label>
         <Select
           value={settings.platform}
           onValueChange={(value: Platform) =>
@@ -67,23 +71,29 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
               <SelectItem key={key} value={key}>
                 <span className="flex items-center gap-2">
                   {info.name}
-                  <span className="text-xs text-muted-foreground">
-                    ({info.aspectRatio})
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {info.width}×{info.height}
                   </span>
                 </span>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {/* Current platform info */}
+        <p className="text-xs text-muted-foreground">
+          {PLATFORM_DIMENSIONS[settings.platform].description}
+        </p>
       </div>
 
       {/* Background Selection */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-foreground">Background</label>
+        <label className="text-sm font-medium text-foreground">
+          Background
+        </label>
         <Tabs
           value={settings.backgroundType}
           onValueChange={(value) =>
-            onSettingsChange({ backgroundType: value as "solid" | "gradient" })
+            onSettingsChange({ backgroundType: value as 'solid' | 'gradient' })
           }
         >
           <TabsList className="w-full">
@@ -100,13 +110,15 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
               {SOLID_COLORS.map((color) => (
                 <button
                   key={color.value}
-                  onClick={() => onSettingsChange({ backgroundColor: color.value })}
+                  onClick={() =>
+                    onSettingsChange({ backgroundColor: color.value })
+                  }
                   className={`
                     aspect-square rounded-lg border-2 transition-all
                     ${
                       settings.backgroundColor === color.value
-                        ? "border-primary ring-2 ring-primary/30 scale-105"
-                        : "border-border hover:border-primary/50"
+                        ? 'border-primary ring-2 ring-primary/30 scale-105'
+                        : 'border-border hover:border-primary/50'
                     }
                   `}
                   style={{ backgroundColor: color.value }}
@@ -128,8 +140,8 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
                     aspect-video rounded-lg border-2 transition-all
                     ${
                       settings.gradientPreset === key
-                        ? "border-primary ring-2 ring-primary/30 scale-105"
-                        : "border-border hover:border-primary/50"
+                        ? 'border-primary ring-2 ring-primary/30 scale-105'
+                        : 'border-border hover:border-primary/50'
                     }
                   `}
                   style={{ background: preset.css }}
@@ -143,7 +155,9 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
 
       {/* Text Color */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-foreground">Text Color</label>
+        <label className="text-sm font-medium text-foreground">
+          Text Color
+        </label>
         <div className="grid grid-cols-6 gap-2">
           {TEXT_COLORS.map((color) => (
             <button
@@ -153,8 +167,8 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
                 aspect-square rounded-lg border-2 transition-all
                 ${
                   settings.textColor === color.value
-                    ? "border-primary ring-2 ring-primary/30 scale-105"
-                    : "border-border hover:border-primary/50"
+                    ? 'border-primary ring-2 ring-primary/30 scale-105'
+                    : 'border-border hover:border-primary/50'
                 }
               `}
               style={{ backgroundColor: color.value }}
@@ -164,6 +178,5 @@ export function DesignPanel({ settings, onSettingsChange }: DesignPanelProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }
-
