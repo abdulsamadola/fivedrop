@@ -162,18 +162,22 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
       {/* Other platform sizes */}
       <div className="space-y-3">
         <p className="text-xs text-muted-foreground font-medium">
-          Quick export for other platforms:
+          Also export for:
         </p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-wrap gap-2">
           {otherPlatforms.map((platformKey) => {
             const platformInfo = PLATFORM_DIMENSIONS[platformKey]
             const isExported = exportedPlatform === platformKey
 
-            // Shorten platform names for cleaner display
-            const shortName = platformInfo.name
-              .replace(' Post', '')
-              .replace(' Square', '')
-              .replace('Story/Reels', 'Story')
+            // Short, clear names
+            const displayName =
+              platformKey === 'instagram-story'
+                ? 'Story'
+                : platformKey === 'instagram'
+                ? 'Instagram'
+                : platformKey === 'twitter'
+                ? 'X/Twitter'
+                : platformKey.charAt(0).toUpperCase() + platformKey.slice(1)
 
             return (
               <Button
@@ -182,18 +186,16 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
                 size="sm"
                 onClick={() => handleExport(platformKey)}
                 disabled={isExporting || !canExport}
-                className="h-9 px-3 text-xs justify-between gap-1"
+                className="h-8 px-3 text-xs gap-1.5"
               >
-                <span className="flex items-center gap-1.5 truncate">
-                  {isExported ? (
-                    <Check className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                  ) : (
-                    <Download className="h-3.5 w-3.5 shrink-0" />
-                  )}
-                  <span className="font-medium truncate">{shortName}</span>
-                </span>
-                <span className="text-[10px] text-muted-foreground shrink-0">
-                  {platformInfo.width}×{platformInfo.height}
+                {isExported ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Download className="h-3 w-3" />
+                )}
+                <span>{displayName}</span>
+                <span className="text-muted-foreground text-[10px]">
+                  {platformInfo.aspectRatio}
                 </span>
               </Button>
             )
