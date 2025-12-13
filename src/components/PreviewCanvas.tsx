@@ -56,89 +56,110 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
     const isStory = settings.platform === 'instagram-story'
     const isCreatorCard = settings.format === 'creator-card'
 
-    // Smarter font size calculation based on content length
+    // Calculate display scale - render at full size, scale down for preview
+    const displayScale = useMemo(() => {
+      const maxPreviewWidth = isStory ? 200 : isSquare ? 320 : 380
+      return maxPreviewWidth / dimensions.width
+    }, [dimensions.width, isSquare, isStory])
+
+    // Font sizes based on FULL export dimensions (not preview size)
     const { mainFontSize, subtitleFontSize, pointerFontSize, handleFontSize } =
       useMemo(() => {
         const contentLength = settings.content.length
         const wordCount = settings.content.split(/\s+/).filter((w) => w).length
         const lineCount = settings.content.split('\n').length
-
-        // Use a combination of character count and word count for better scaling
         const complexityScore = contentLength + wordCount * 2 + lineCount * 10
 
+        // Base size relative to canvas width (for 1080px width)
+        const baseWidth = dimensions.width
         let main: number
 
         if (isStory) {
-          // Story format - taller, needs different scaling
-          if (complexityScore < 60) main = 48
-          else if (complexityScore < 100) main = 42
-          else if (complexityScore < 150) main = 36
-          else if (complexityScore < 220) main = 30
-          else if (complexityScore < 300) main = 26
-          else if (complexityScore < 400) main = 22
-          else if (complexityScore < 500) main = 19
-          else main = 16
+          // Story format (1080x1920) - taller canvas
+          if (complexityScore < 60) main = baseWidth * 0.065
+          else if (complexityScore < 100) main = baseWidth * 0.055
+          else if (complexityScore < 150) main = baseWidth * 0.048
+          else if (complexityScore < 220) main = baseWidth * 0.042
+          else if (complexityScore < 300) main = baseWidth * 0.036
+          else if (complexityScore < 400) main = baseWidth * 0.032
+          else if (complexityScore < 500) main = baseWidth * 0.028
+          else main = baseWidth * 0.024
         } else if (isSquare) {
-          // Square format - most common
-          if (complexityScore < 50) main = 42
-          else if (complexityScore < 80) main = 36
-          else if (complexityScore < 120) main = 32
-          else if (complexityScore < 180) main = 28
-          else if (complexityScore < 250) main = 24
-          else if (complexityScore < 350) main = 21
-          else if (complexityScore < 450) main = 18
-          else if (complexityScore < 600) main = 16
-          else main = 14
+          // Square format (1080x1080)
+          if (complexityScore < 50) main = baseWidth * 0.058
+          else if (complexityScore < 80) main = baseWidth * 0.050
+          else if (complexityScore < 120) main = baseWidth * 0.044
+          else if (complexityScore < 180) main = baseWidth * 0.038
+          else if (complexityScore < 250) main = baseWidth * 0.034
+          else if (complexityScore < 350) main = baseWidth * 0.030
+          else if (complexityScore < 450) main = baseWidth * 0.026
+          else if (complexityScore < 600) main = baseWidth * 0.023
+          else main = baseWidth * 0.020
         } else {
-          // Landscape formats - less vertical space
-          if (complexityScore < 50) main = 38
-          else if (complexityScore < 80) main = 32
-          else if (complexityScore < 120) main = 28
-          else if (complexityScore < 180) main = 24
-          else if (complexityScore < 250) main = 21
-          else if (complexityScore < 350) main = 18
-          else if (complexityScore < 450) main = 16
-          else main = 14
+          // Landscape formats (1200x630)
+          if (complexityScore < 50) main = baseWidth * 0.048
+          else if (complexityScore < 80) main = baseWidth * 0.042
+          else if (complexityScore < 120) main = baseWidth * 0.036
+          else if (complexityScore < 180) main = baseWidth * 0.032
+          else if (complexityScore < 250) main = baseWidth * 0.028
+          else if (complexityScore < 350) main = baseWidth * 0.025
+          else if (complexityScore < 450) main = baseWidth * 0.022
+          else main = baseWidth * 0.020
         }
 
-        // Adjust for format
+        // Adjust for format type
         if (settings.format === 'long-thought') {
-          main = Math.max(main - 2, 14)
+          main = Math.max(main * 0.92, baseWidth * 0.018)
         } else if (settings.format === 'list-drop') {
-          main = Math.max(main - 1, 14)
+          main = Math.max(main * 0.95, baseWidth * 0.018)
         } else if (isCreatorCard) {
-          // Creator card needs room for header
-          main = Math.max(main - 1, 14)
+          main = Math.max(main * 0.95, baseWidth * 0.018)
         }
 
         return {
-          mainFontSize: main,
-          subtitleFontSize: Math.max(Math.floor(main * 0.55), 12),
-          pointerFontSize: Math.max(Math.floor(main * 0.45), 11),
-          handleFontSize: Math.max(Math.floor(main * 0.4), 11),
+          mainFontSize: Math.round(main),
+          subtitleFontSize: Math.round(Math.max(main * 0.5, baseWidth * 0.016)),
+          pointerFontSize: Math.round(Math.max(main * 0.42, baseWidth * 0.014)),
+          handleFontSize: Math.round(Math.max(main * 0.38, baseWidth * 0.014)),
         }
       }, [
         settings.content,
-        settings.platform,
         settings.format,
+        dimensions.width,
         isSquare,
         isStory,
         isCreatorCard,
       ])
 
-    // Auto-scale name font size based on name length
+    // Name font size scaled for export dimensions
     const nameFontSize = useMemo(() => {
       const nameLength = settings.creatorName?.length || 0
-      const baseSize = Math.max(Math.floor(mainFontSize * 0.55), 14)
+      const baseSize = Math.round(Math.max(mainFontSize * 0.52, dimensions.width * 0.022))
 
-      // Scale down name font if name is too long
-      if (nameLength > 25) return Math.max(baseSize * 0.7, 12)
-      if (nameLength > 20) return Math.max(baseSize * 0.8, 12)
-      if (nameLength > 15) return Math.max(baseSize * 0.9, 13)
+      if (nameLength > 25) return Math.round(baseSize * 0.72)
+      if (nameLength > 20) return Math.round(baseSize * 0.82)
+      if (nameLength > 15) return Math.round(baseSize * 0.9)
       return baseSize
-    }, [settings.creatorName, mainFontSize])
+    }, [settings.creatorName, mainFontSize, dimensions.width])
 
-    // Apply highlight to content - works for all formats
+    // Determine if content is short (group elements together)
+    const isShortContent = useMemo(() => {
+      const contentLength = settings.content.length
+      const hasSubtitle = !!settings.subtitle
+      const hasCTA = settings.showCtaButton
+      const hasPointer = settings.showCommentPointer
+
+      if (contentLength < 80 && !hasSubtitle && !hasCTA && !hasPointer) return true
+      if (contentLength < 120 && !(hasSubtitle && hasCTA)) return true
+      return false
+    }, [
+      settings.content,
+      settings.subtitle,
+      settings.showCtaButton,
+      settings.showCommentPointer,
+    ])
+
+    // Apply highlight to content
     const applyHighlight = (text: string): React.ReactNode => {
       if (!settings.highlightText || !text.includes(settings.highlightText)) {
         return text
@@ -171,8 +192,8 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             .split(/\n|(?=\d+[.\)]\s)/)
             .filter((line) => line.trim())
           return lines.map((line, i) => (
-            <div key={i} className="flex gap-2 items-start">
-              <span className="opacity-60 font-medium flex-shrink-0">
+            <div key={i} className="flex items-start" style={{ gap: `${dimensions.width * 0.015}px` }}>
+              <span className="opacity-60 font-medium shrink-0">
                 {i + 1}.
               </span>
               <span>
@@ -184,8 +205,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
           return (
             <div className="relative">
               <span
-                className="absolute -left-6 top-0 opacity-40"
-                style={{ fontSize: `${mainFontSize * 0.8}px` }}
+                className="absolute opacity-40"
+                style={{ 
+                  fontSize: `${mainFontSize * 0.8}px`,
+                  left: `-${dimensions.width * 0.045}px`,
+                  top: 0
+                }}
               >
                 🧵
               </span>
@@ -201,180 +226,192 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       settings.highlightText,
       settings.highlightColor,
       mainFontSize,
+      dimensions.width,
     ])
 
-    const aspectRatio = dimensions.width / dimensions.height
-
-    // Calculate CTA button size
+    // CTA button size based on export dimensions
     const ctaSize = useMemo(() => {
-      const baseSize = Math.max(mainFontSize * 1.2, 32)
+      const baseSize = Math.max(mainFontSize * 1.1, dimensions.width * 0.045)
       const multiplier = CTA_SIZES[settings.ctaSize].multiplier
-      return baseSize * multiplier
-    }, [mainFontSize, settings.ctaSize])
+      return Math.round(baseSize * multiplier)
+    }, [mainFontSize, settings.ctaSize, dimensions.width])
 
-    // Determine if content is short (should group elements together)
-    const isShortContent = useMemo(() => {
-      const contentLength = settings.content.length
-      const hasSubtitle = !!settings.subtitle
-      const hasCTA = settings.showCtaButton
-      const hasPointer = settings.showCommentPointer
-      
-      // Content is "short" if it's under ~80 chars and no extras
-      if (contentLength < 80 && !hasSubtitle && !hasCTA && !hasPointer) return true
-      // Or under 120 chars with just one extra element
-      if (contentLength < 120 && !(hasSubtitle && hasCTA)) return true
-      return false
-    }, [settings.content, settings.subtitle, settings.showCtaButton, settings.showCommentPointer])
+    // Avatar size
+    const avatarSize = Math.round(Math.max(mainFontSize * 1.6, dimensions.width * 0.065))
 
-    // Fixed preview dimensions for consistency
-    const previewWidth = isStory ? 240 : isSquare ? 340 : 400
-    const previewHeight = Math.round(previewWidth / aspectRatio)
+    // Padding based on export dimensions
+    const padding = useMemo(() => {
+      const w = dimensions.width
+      if (isStory) return `${w * 0.07}px ${w * 0.065}px`
+      if (isSquare) return `${w * 0.055}px ${w * 0.06}px`
+      return `${w * 0.05}px ${w * 0.055}px`
+    }, [dimensions.width, isSquare, isStory])
 
     return (
-      <div className="w-full flex justify-center">
+      <div 
+        className="w-full flex justify-center overflow-hidden"
+        style={{ 
+          maxHeight: isStory ? '450px' : isSquare ? '350px' : '280px',
+        }}
+      >
+        {/* Scaled wrapper for display */}
         <div
-          ref={ref}
-          className="preview-canvas rounded-lg overflow-hidden relative flex flex-col"
           style={{
-            background,
-            width: `${previewWidth}px`,
-            height: `${previewHeight}px`,
+            transform: `scale(${displayScale})`,
+            transformOrigin: 'top center',
           }}
         >
+          {/* Actual canvas at export size */}
           <div
-            className={`${fontClass} h-full flex flex-col ${isShortContent ? 'justify-center' : 'justify-between'}`}
+            ref={ref}
+            className="preview-canvas rounded-lg overflow-hidden relative flex flex-col"
             style={{
-              color: settings.textColor,
-              padding: isStory
-                ? '8% 7% 6%'
-                : isSquare
-                ? '6% 7% 5%'
-                : '5% 6% 4%',
+              background,
+              width: `${dimensions.width}px`,
+              height: `${dimensions.height}px`,
             }}
           >
-            {/* Top Section - Header for Creator Card */}
-            <div className={isShortContent && isCreatorCard ? 'mb-4' : ''}>
-              {isCreatorCard &&
-                (settings.creatorName || settings.creatorHandle) && (
-                  <div className="flex items-center gap-2">
-                    {/* Avatar */}
-                    {settings.creatorAvatar ? (
-                      <img
-                        src={settings.creatorAvatar}
-                        alt={settings.creatorName}
-                        className="rounded-full object-cover flex-shrink-0"
-                        style={{
-                          width: `${Math.max(mainFontSize * 1.8, 40)}px`,
-                          height: `${Math.max(mainFontSize * 1.8, 40)}px`,
-                        }}
-                        crossOrigin="anonymous"
-                      />
-                    ) : (
-                      <div
-                        className="rounded-full bg-gray-600 flex items-center justify-center text-white font-bold flex-shrink-0"
-                        style={{
-                          width: `${Math.max(mainFontSize * 1.8, 40)}px`,
-                          height: `${Math.max(mainFontSize * 1.8, 40)}px`,
-                          fontSize: `${Math.max(mainFontSize * 0.65, 14)}px`,
-                        }}
-                      >
-                        {settings.creatorName?.charAt(0)?.toUpperCase() || '?'}
-                      </div>
-                    )}
-                    {/* Name & Handle */}
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        <span
-                          className="font-semibold"
-                          style={{ fontSize: `${nameFontSize}px` }}
+            <div
+              className={`${fontClass} h-full flex flex-col ${
+                isShortContent ? 'justify-center' : 'justify-between'
+              }`}
+              style={{
+                color: settings.textColor,
+                padding,
+              }}
+            >
+              {/* Top Section - Header for Creator Card */}
+              <div className={isShortContent && isCreatorCard ? '' : ''} style={{ marginBottom: isShortContent && isCreatorCard ? `${dimensions.width * 0.03}px` : 0 }}>
+                {isCreatorCard &&
+                  (settings.creatorName || settings.creatorHandle) && (
+                    <div className="flex items-center" style={{ gap: `${dimensions.width * 0.018}px` }}>
+                      {/* Avatar */}
+                      {settings.creatorAvatar ? (
+                        <img
+                          src={settings.creatorAvatar}
+                          alt={settings.creatorName}
+                          className="rounded-full object-cover shrink-0"
+                          style={{
+                            width: `${avatarSize}px`,
+                            height: `${avatarSize}px`,
+                          }}
+                          crossOrigin="anonymous"
+                        />
+                      ) : (
+                        <div
+                          className="rounded-full bg-gray-600 flex items-center justify-center text-white font-bold shrink-0"
+                          style={{
+                            width: `${avatarSize}px`,
+                            height: `${avatarSize}px`,
+                            fontSize: `${avatarSize * 0.45}px`,
+                          }}
                         >
-                          {settings.creatorName || 'Your Name'}
+                          {settings.creatorName?.charAt(0)?.toUpperCase() || '?'}
+                        </div>
+                      )}
+                      {/* Name & Handle */}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <div className="flex items-center flex-wrap" style={{ gap: `${dimensions.width * 0.008}px` }}>
+                          <span
+                            className="font-semibold"
+                            style={{ fontSize: `${nameFontSize}px` }}
+                          >
+                            {settings.creatorName || 'Your Name'}
+                          </span>
+                          {settings.showVerifiedBadge && (
+                            <VerifiedBadge
+                              size={Math.round(nameFontSize * 0.95)}
+                            />
+                          )}
+                        </div>
+                        <span
+                          className="opacity-60"
+                          style={{ fontSize: `${handleFontSize}px` }}
+                        >
+                          {settings.creatorHandle
+                            ? `@${settings.creatorHandle.replace('@', '')}`
+                            : '@handle'}
                         </span>
-                        {settings.showVerifiedBadge && (
-                          <VerifiedBadge
-                            size={Math.max(nameFontSize * 1, 14)}
-                          />
-                        )}
                       </div>
-                      <span
-                        className="opacity-60"
-                        style={{ fontSize: `${handleFontSize}px` }}
-                      >
-                        {settings.creatorHandle
-                          ? `@${settings.creatorHandle.replace('@', '')}`
-                          : '@handle'}
-                      </span>
+                    </div>
+                  )}
+              </div>
+
+              {/* Middle Section - Main Content */}
+              <div
+                className={`${isShortContent ? '' : 'flex-1 flex items-center'}`}
+                style={{ padding: isShortContent ? `${dimensions.width * 0.025}px 0` : `${dimensions.width * 0.015}px 0` }}
+              >
+                <div
+                  className="leading-snug font-bold w-full"
+                  style={{
+                    fontSize: `${mainFontSize}px`,
+                    lineHeight: 1.25,
+                    letterSpacing: '-0.01em',
+                  }}
+                >
+                  {formattedContent || (
+                    <span className="opacity-40 italic font-normal">
+                      Your content will appear here...
+                    </span>
+                  )}
+
+                  {/* Subtitle - right after content */}
+                  {settings.subtitle && (
+                    <div
+                      className="opacity-80 font-normal"
+                      style={{
+                        fontSize: `${subtitleFontSize}px`,
+                        lineHeight: 1.4,
+                        marginTop: `${dimensions.width * 0.02}px`,
+                      }}
+                    >
+                      {applyHighlight(settings.subtitle)}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bottom Section - Comment Pointer or CTA */}
+              <div>
+                {/* Comment Pointer */}
+                {settings.showCommentPointer && settings.commentPointerText && (
+                  <div
+                    className="opacity-70 font-medium"
+                    style={{
+                      fontSize: `${pointerFontSize}px`,
+                      paddingBottom: `${dimensions.width * 0.01}px`,
+                    }}
+                  >
+                    {settings.commentPointerText}
+                  </div>
+                )}
+
+                {/* CTA Button */}
+                {settings.showCtaButton && (
+                  <div 
+                    className="flex justify-center"
+                    style={{ paddingTop: `${dimensions.width * 0.015}px` }}
+                  >
+                    <div
+                      className="rounded-full flex items-center justify-center"
+                      style={{
+                        backgroundColor: settings.highlightColor,
+                        width: `${ctaSize}px`,
+                        height: `${ctaSize}px`,
+                      }}
+                    >
+                      <ArrowDown
+                        className="text-black"
+                        style={{
+                          width: `${ctaSize * 0.5}px`,
+                          height: `${ctaSize * 0.5}px`,
+                        }}
+                      />
                     </div>
                   </div>
                 )}
-            </div>
-
-            {/* Middle Section - Main Content */}
-            <div className={`${isShortContent ? 'py-4' : 'flex-1 flex items-center py-2'}`}>
-              <div
-                className="leading-snug font-bold w-full"
-                style={{
-                  fontSize: `${mainFontSize}px`,
-                  lineHeight: 1.3,
-                  letterSpacing: '-0.01em',
-                }}
-              >
-                {formattedContent || (
-                  <span className="opacity-40 italic font-normal">
-                    Your content will appear here...
-                  </span>
-                )}
-
-                {/* Subtitle - right after content */}
-                {settings.subtitle && (
-                  <div
-                    className="mt-2 opacity-80 font-normal"
-                    style={{
-                      fontSize: `${subtitleFontSize}px`,
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {applyHighlight(settings.subtitle)}
-                  </div>
-                )}
               </div>
-            </div>
-
-            {/* Bottom Section - Comment Pointer or CTA */}
-            <div>
-              {/* Comment Pointer */}
-              {settings.showCommentPointer && settings.commentPointerText && (
-                <div
-                  className="opacity-70 font-medium pb-1"
-                  style={{
-                    fontSize: `${pointerFontSize}px`,
-                  }}
-                >
-                  {settings.commentPointerText}
-                </div>
-              )}
-
-              {/* CTA Button */}
-              {settings.showCtaButton && (
-                <div className="flex justify-center pt-1">
-                  <div
-                    className="rounded-full flex items-center justify-center"
-                    style={{
-                      backgroundColor: settings.highlightColor,
-                      width: `${ctaSize}px`,
-                      height: `${ctaSize}px`,
-                    }}
-                  >
-                    <ArrowDown
-                      className="text-black"
-                      style={{
-                        width: `${ctaSize * 0.5}px`,
-                        height: `${ctaSize * 0.5}px`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

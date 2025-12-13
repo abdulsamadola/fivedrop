@@ -30,25 +30,13 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
 
     try {
       const dimensions = PLATFORM_DIMENSIONS[platform]
-      const element = previewRef.current
 
-      // Get current element size
-      const rect = element.getBoundingClientRect()
-
-      // Calculate scale factor to reach target dimensions
-      const scaleX = dimensions.width / rect.width
-      const scaleY = dimensions.height / rect.height
-
-      const dataUrl = await toPng(element, {
+      // Canvas is already rendered at full size, just capture it directly
+      const dataUrl = await toPng(previewRef.current, {
         width: dimensions.width,
         height: dimensions.height,
-        canvasWidth: dimensions.width,
-        canvasHeight: dimensions.height,
         pixelRatio: 1,
-        style: {
-          transform: `scale(${scaleX}, ${scaleY})`,
-          transformOrigin: 'top left',
-        },
+        quality: 1,
       })
 
       // Create and trigger download with descriptive filename
@@ -95,9 +83,9 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
 
       {/* Mobile-friendly notice */}
       <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg text-xs text-muted-foreground">
-        <Smartphone className="h-4 w-4 mt-0.5 flex-shrink-0" />
+        <Smartphone className="h-4 w-4 mt-0.5 shrink-0" />
         <span>
-          Images export at full resolution for crisp quality on all devices.
+          What you see is what you get - exports at full resolution.
         </span>
       </div>
 
