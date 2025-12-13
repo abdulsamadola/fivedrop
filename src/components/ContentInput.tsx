@@ -5,8 +5,8 @@ import { Toggle } from "@/components/ui/toggle";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Smile } from "lucide-react";
-import type { PostSettings } from "@/lib/types";
+import { MessageSquare, Smile, User, BadgeCheck, ArrowDown } from "lucide-react";
+import type { PostSettings, HIGHLIGHT_COLORS } from "@/lib/types";
 
 interface ContentInputProps {
   settings: PostSettings;
@@ -20,11 +20,21 @@ const EMOJI_GROUPS = {
   "Objects": ["📈", "📉", "💰", "🎁", "📚", "🧵", "📋", "✅"],
 };
 
+const HIGHLIGHT_COLOR_OPTIONS = [
+  { name: "Yellow", value: "#FACC15" },
+  { name: "Cyan", value: "#22D3EE" },
+  { name: "Green", value: "#4ADE80" },
+  { name: "Pink", value: "#F472B6" },
+  { name: "Orange", value: "#FB923C" },
+  { name: "Blue", value: "#60A5FA" },
+];
+
 export function ContentInput({ settings, onSettingsChange }: ContentInputProps) {
   const characterCount = settings.content.length;
   const maxChars = 500;
   const isNearLimit = characterCount > maxChars * 0.8;
   const isOverLimit = characterCount > maxChars;
+  const isCreatorCard = settings.format === "creator-card";
 
   const insertEmoji = (emoji: string) => {
     onSettingsChange({ content: settings.content + emoji });
@@ -32,6 +42,69 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
 
   return (
     <div className="space-y-4">
+      {/* Creator Card Profile Section */}
+      {isCreatorCard && (
+        <div className="space-y-3 p-4 bg-secondary/50 rounded-lg">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <User className="h-4 w-4" />
+            Profile Header
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Display Name</label>
+              <input
+                type="text"
+                placeholder="Your Name"
+                value={settings.creatorName}
+                onChange={(e) => onSettingsChange({ creatorName: e.target.value })}
+                className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Handle</label>
+              <input
+                type="text"
+                placeholder="username"
+                value={settings.creatorHandle}
+                onChange={(e) => onSettingsChange({ creatorHandle: e.target.value })}
+                className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground">Avatar URL</label>
+            <input
+              type="text"
+              placeholder="https://example.com/avatar.jpg"
+              value={settings.creatorAvatar}
+              onChange={(e) => onSettingsChange({ creatorAvatar: e.target.value })}
+              className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+            />
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-2">
+              <BadgeCheck className="h-4 w-4 text-blue-500" />
+              <span className="text-sm">Verified Badge</span>
+            </div>
+            <Toggle
+              pressed={settings.showVerifiedBadge}
+              onPressedChange={(pressed) =>
+                onSettingsChange({ showVerifiedBadge: pressed })
+              }
+              aria-label="Toggle verified badge"
+              size="sm"
+              className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+            >
+              {settings.showVerifiedBadge ? "On" : "Off"}
+            </Toggle>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <label className="text-sm font-medium text-foreground">
@@ -81,10 +154,52 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
 Example: Most people think they need more time. They don't. They need more focus."
           value={settings.content}
           onChange={(e) => onSettingsChange({ content: e.target.value })}
-          className="min-h-[140px] resize-none text-base leading-relaxed"
+          className="min-h-[120px] resize-none text-base leading-relaxed"
         />
       </div>
 
+      {/* Highlight Text */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">
+          Highlight Text <span className="text-muted-foreground font-normal">(optional)</span>
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Text to highlight in color"
+            value={settings.highlightText}
+            onChange={(e) => onSettingsChange({ highlightText: e.target.value })}
+            className="flex-1 px-3 py-2 text-sm rounded-md border border-input bg-background"
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="w-10 h-10 rounded-md border border-input"
+                style={{ backgroundColor: settings.highlightColor }}
+              />
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" align="end">
+              <div className="flex gap-1">
+                {HIGHLIGHT_COLOR_OPTIONS.map((color) => (
+                  <button
+                    key={color.value}
+                    onClick={() => onSettingsChange({ highlightColor: color.value })}
+                    className={`w-8 h-8 rounded-md border-2 transition-all ${
+                      settings.highlightColor === color.value
+                        ? "border-foreground scale-110"
+                        : "border-transparent"
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+
+      {/* Subtitle */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">
           Subtitle <span className="text-muted-foreground font-normal">(optional)</span>
@@ -93,14 +208,33 @@ Example: Most people think they need more time. They don't. They need more focus
           placeholder="Add context or a secondary line..."
           value={settings.subtitle}
           onChange={(e) => onSettingsChange({ subtitle: e.target.value })}
-          className="min-h-[60px] resize-none text-sm"
+          className="min-h-[50px] resize-none text-sm"
         />
       </div>
 
+      {/* CTA Button */}
+      <div className="flex items-center justify-between py-3 px-4 bg-secondary/50 rounded-lg">
+        <div className="flex items-center gap-2">
+          <ArrowDown className="h-4 w-4 text-muted-foreground" />
+          <span className="text-sm">Show CTA Arrow Button</span>
+        </div>
+        <Toggle
+          pressed={settings.showCtaButton}
+          onPressedChange={(pressed) =>
+            onSettingsChange({ showCtaButton: pressed })
+          }
+          aria-label="Toggle CTA button"
+          className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+        >
+          {settings.showCtaButton ? "On" : "Off"}
+        </Toggle>
+      </div>
+
+      {/* Comment Pointer */}
       <div className="flex items-center justify-between py-3 px-4 bg-secondary/50 rounded-lg">
         <div className="flex items-center gap-2">
           <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">This post continues in comments</span>
+          <span className="text-sm">Post continues in comments</span>
         </div>
         <Toggle
           pressed={settings.showCommentPointer}
@@ -130,4 +264,3 @@ Example: Most people think they need more time. They don't. They need more focus
     </div>
   );
 }
-

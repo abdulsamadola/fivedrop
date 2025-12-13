@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Download, Loader2, Check } from "lucide-react";
+import { Download, Loader2, Check, Smartphone } from "lucide-react";
 import {
   PLATFORM_DIMENSIONS,
   type Platform,
@@ -28,19 +28,21 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
 
     try {
       const dimensions = PLATFORM_DIMENSIONS[platform];
-      
-      // Clone the preview element and resize it
       const element = previewRef.current;
+      
+      // Get the current element dimensions
+      const rect = element.getBoundingClientRect();
+      const scale = dimensions.width / rect.width;
       
       const dataUrl = await toPng(element, {
         width: dimensions.width,
         height: dimensions.height,
-        pixelRatio: 2,
+        pixelRatio: 1, // Reduced for smaller file size
         style: {
-          width: `${dimensions.width}px`,
-          height: `${dimensions.height}px`,
-          transform: "scale(1)",
+          transform: `scale(${scale})`,
           transformOrigin: "top left",
+          width: `${rect.width}px`,
+          height: `${rect.height}px`,
         },
       });
 
@@ -62,6 +64,10 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
   const currentPlatform = settings.platform;
   const currentDimensions = PLATFORM_DIMENSIONS[currentPlatform];
 
+  // Recommended platforms based on current selection
+  const platformOrder: Platform[] = ["instagram", "instagram-story", "facebook", "linkedin", "twitter"];
+  const otherPlatforms = platformOrder.filter(p => p !== currentPlatform);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -69,6 +75,14 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         <Badge variant="outline" className="text-xs">
           {currentDimensions.width} × {currentDimensions.height}
         </Badge>
+      </div>
+
+      {/* Mobile-friendly notice */}
+      <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg text-xs text-muted-foreground">
+        <Smartphone className="h-4 w-4 mt-0.5 flex-shrink-0" />
+        <span>
+          Images are optimized for mobile posting. Square (1:1) format works best on most platforms.
+        </span>
       </div>
 
       {/* Quick Export - Current Platform */}
@@ -91,25 +105,25 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         ) : (
           <>
             <Download className="mr-2 h-5 w-5" />
-            Download for {currentDimensions.name}
+            Download {currentDimensions.name}
           </>
         )}
       </Button>
 
       {/* All Platforms */}
       <div className="space-y-2">
-        <p className="text-xs text-muted-foreground">Export for other platforms:</p>
+        <p className="text-xs text-muted-foreground">Other sizes:</p>
         <div className="grid grid-cols-2 gap-2">
-          {Object.entries(PLATFORM_DIMENSIONS)
-            .filter(([key]) => key !== currentPlatform)
-            .map(([key, info]) => (
+          {otherPlatforms.map((key) => {
+            const info = PLATFORM_DIMENSIONS[key];
+            return (
               <Button
                 key={key}
                 variant="outline"
                 size="sm"
-                onClick={() => handleExport(key as Platform)}
+                onClick={() => handleExport(key)}
                 disabled={isExporting || !settings.content}
-                className="text-xs"
+                className="text-xs h-9"
               >
                 {exportedPlatform === key ? (
                   <Check className="mr-1 h-3 w-3" />
@@ -118,16 +132,16 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
                 )}
                 {info.name}
               </Button>
-            ))}
+            );
+          })}
         </div>
       </div>
 
       {!settings.content && (
         <p className="text-xs text-muted-foreground text-center py-2">
-          Add some content to enable export
+          Add content to enable export
         </p>
       )}
     </div>
   );
 }
-

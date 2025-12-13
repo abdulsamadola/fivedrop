@@ -3,7 +3,8 @@ export type PostFormat =
   | "hook-comments"
   | "thread-starter"
   | "long-thought"
-  | "list-drop";
+  | "list-drop"
+  | "creator-card";
 
 export type FontFamily =
   | "dm-sans"
@@ -22,7 +23,7 @@ export type GradientPreset =
   | "coral"
   | "slate";
 
-export type Platform = "facebook" | "linkedin" | "twitter" | "instagram";
+export type Platform = "facebook" | "linkedin" | "twitter" | "instagram" | "instagram-story";
 
 export interface PlatformDimensions {
   width: number;
@@ -32,6 +33,18 @@ export interface PlatformDimensions {
 }
 
 export const PLATFORM_DIMENSIONS: Record<Platform, PlatformDimensions> = {
+  instagram: {
+    width: 1080,
+    height: 1080,
+    name: "Square (1:1)",
+    aspectRatio: "1:1",
+  },
+  "instagram-story": {
+    width: 1080,
+    height: 1920,
+    name: "Story (9:16)",
+    aspectRatio: "9:16",
+  },
   facebook: {
     width: 1200,
     height: 630,
@@ -50,12 +63,6 @@ export const PLATFORM_DIMENSIONS: Record<Platform, PlatformDimensions> = {
     name: "X (Twitter)",
     aspectRatio: "16:9",
   },
-  instagram: {
-    width: 1080,
-    height: 1080,
-    name: "Instagram",
-    aspectRatio: "1:1",
-  },
 };
 
 export interface PostSettings {
@@ -70,26 +77,47 @@ export interface PostSettings {
   gradientPreset: GradientPreset;
   textColor: string;
   platform: Platform;
+  // Creator Card specific
+  creatorName: string;
+  creatorHandle: string;
+  creatorAvatar: string;
+  showVerifiedBadge: boolean;
+  showCtaButton: boolean;
+  highlightText: string;
+  highlightColor: string;
 }
 
 export const DEFAULT_SETTINGS: PostSettings = {
   content: "",
   subtitle: "",
-  format: "hook-only",
+  format: "creator-card",
   showCommentPointer: false,
   commentPointerText: "👇 Read the full breakdown in comments",
   fontFamily: "dm-sans",
   backgroundType: "solid",
-  backgroundColor: "#1a1a2e",
+  backgroundColor: "#000000",
   gradientPreset: "ocean",
   textColor: "#ffffff",
-  platform: "facebook",
+  platform: "instagram",
+  // Creator Card defaults
+  creatorName: "",
+  creatorHandle: "",
+  creatorAvatar: "",
+  showVerifiedBadge: true,
+  showCtaButton: false,
+  highlightText: "",
+  highlightColor: "#FACC15",
 };
 
 export const FORMAT_INFO: Record<
   PostFormat,
   { name: string; description: string; icon: string }
 > = {
+  "creator-card": {
+    name: "Creator Card",
+    description: "Profile header + hook",
+    icon: "👤",
+  },
   "hook-only": {
     name: "Hook Only",
     description: "Single powerful statement",
@@ -163,13 +191,13 @@ export const GRADIENT_PRESETS: Record<
 };
 
 export const SOLID_COLORS = [
+  { name: "Pure Black", value: "#000000" },
   { name: "Charcoal", value: "#1a1a2e" },
   { name: "Navy", value: "#16213e" },
   { name: "Deep Purple", value: "#2d1b4e" },
   { name: "Forest", value: "#1b3a2f" },
   { name: "Burgundy", value: "#4a1c2c" },
   { name: "Slate", value: "#2c3e50" },
-  { name: "Pure Black", value: "#000000" },
   { name: "Soft White", value: "#f8f9fa" },
   { name: "Cream", value: "#fef9e7" },
   { name: "Light Blue", value: "#e8f4f8" },
@@ -184,3 +212,11 @@ export const TEXT_COLORS = [
   { name: "Navy", value: "#1a1a2e" },
 ];
 
+export const HIGHLIGHT_COLORS = [
+  { name: "Yellow", value: "#FACC15" },
+  { name: "Cyan", value: "#22D3EE" },
+  { name: "Green", value: "#4ADE80" },
+  { name: "Pink", value: "#F472B6" },
+  { name: "Orange", value: "#FB923C" },
+  { name: "Blue", value: "#60A5FA" },
+];
