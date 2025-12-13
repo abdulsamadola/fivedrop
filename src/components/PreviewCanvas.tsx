@@ -123,55 +123,59 @@ function useSmartScaling(settings: PostSettings) {
         break
     }
 
-    // Calculate base font size
-    let mainSize = width * (baseSizePercent / 100)
+    // Calculate BASE font size (used for header elements - stays stable)
+    const baseSize = width * (baseSizePercent / 100)
 
-    // Content-aware scaling - progressive reduction for longer content
+    // Header elements use a stable size that doesn't scale with content length
+    // This maintains the visual rhythm and keeps the profile card prominent
+    const headerSize = baseSize * (canvasType === 'landscape' ? 0.9 : 1.0)
+
+    // Main content size scales based on content length
+    let mainSize = baseSize
+
+    // Content-aware scaling - only affects the main body text
+    let contentMultiplier: number
     if (contentMetrics.isShort) {
-      // Short content (< 60 chars) - can be larger and impactful
-      mainSize *= 1.12
+      // Short content (< 60 chars) - larger for impact
+      contentMultiplier = 1.05
     } else if (contentMetrics.isMedium) {
-      // Medium content (60-150 chars) - standard size
-      mainSize *= 1.0
+      // Medium content (60-150 chars)
+      contentMultiplier = canvasType === 'landscape' ? 0.88 : 0.95
     } else if (contentMetrics.isLong) {
-      // Long content (150-280 chars) - moderate reduction
-      mainSize *= 0.82
+      // Long content (150-280 chars)
+      contentMultiplier = canvasType === 'landscape' ? 0.72 : 0.82
     } else if (contentMetrics.isVeryLong) {
-      // Very long content (280-450 chars) - significant reduction
-      mainSize *= 0.68
+      // Very long content (280-450 chars)
+      contentMultiplier = canvasType === 'landscape' ? 0.58 : 0.68
     } else if (contentMetrics.isExtraLong) {
-      // Extra long content (450-650 chars) - more reduction
-      mainSize *= 0.55
-    } else if (contentMetrics.isUltraLong) {
-      // Ultra long content (650+ chars) - maximum reduction
-      mainSize *= 0.45
+      // Extra long content (450-650 chars)
+      contentMultiplier = canvasType === 'landscape' ? 0.48 : 0.55
+    } else {
+      // Ultra long content (650+ chars)
+      contentMultiplier = canvasType === 'landscape' ? 0.4 : 0.45
     }
 
-    // Format-specific adjustments
+    mainSize *= contentMultiplier
+
+    // Format-specific adjustments for main content only
     if (settings.format === 'list-drop') {
-      mainSize *= 0.88 // Lists need smaller text for readability
+      mainSize *= 0.9
     } else if (settings.format === 'long-thought') {
-      mainSize *= 0.85 // Long thoughts should be comfortable to read
-    } else if (settings.format === 'creator-card') {
-      mainSize *= 0.95 // Creator cards have header, slightly smaller
+      mainSize *= 0.88
     }
 
-    // Ensure minimum and maximum bounds
-    // Minimum varies based on content length for readability
-    const minSize = contentMetrics.isUltraLong
-      ? width * 0.018 // Allow smaller for ultra long content
-      : contentMetrics.isExtraLong
-      ? width * 0.02
-      : width * 0.022
-    const maxSize = width * 0.075 // Maximum 7.5% of width
+    // Bounds for main content text
+    const minSize = width * 0.018
+    const maxSize = canvasType === 'landscape' ? width * 0.052 : width * 0.065
     mainSize = Math.max(minSize, Math.min(maxSize, mainSize))
 
     return {
       main: Math.round(mainSize),
-      subtitle: Math.round(mainSize * 0.5),
-      handle: Math.round(mainSize * 0.4),
-      name: Math.round(mainSize * 0.55),
-      pointer: Math.round(mainSize * 0.42),
+      subtitle: Math.round(mainSize * 0.52),
+      // Header elements use the stable headerSize, not mainSize
+      handle: Math.round(headerSize * 0.38),
+      name: Math.round(headerSize * 0.48),
+      pointer: Math.round(mainSize * 0.45),
     }
   }, [width, canvasType, contentMetrics, settings.format])
 
@@ -195,20 +199,21 @@ function useSmartScaling(settings: PostSettings) {
     }
   }, [width, height, baseUnit, canvasType])
 
-  // Element sizes
+  // Element sizes - avatar uses stable sizing for visual consistency
   const elementSizes = useMemo(() => {
-    const avatarSize = Math.round(Math.max(fontSize.main * 1.4, baseUnit * 6))
-    const ctaBaseSize = Math.round(
-      Math.max(fontSize.main * 1.1, baseUnit * 4.5)
-    )
+    // Avatar size should be stable and prominent, based on canvas not content
+    const minAvatar = canvasType === 'landscape' ? baseUnit * 5.5 : baseUnit * 6
+    const avatarSize = Math.round(Math.max(fontSize.name * 1.8, minAvatar))
+
+    const ctaBaseSize = Math.round(Math.max(fontSize.main * 1.0, baseUnit * 4))
     const ctaMultiplier = CTA_SIZES[settings.ctaSize].multiplier
 
     return {
       avatar: avatarSize,
       cta: Math.round(ctaBaseSize * ctaMultiplier),
-      badge: Math.round(fontSize.name * 0.9),
+      badge: Math.round(fontSize.name * 0.85),
     }
-  }, [fontSize, baseUnit, settings.ctaSize])
+  }, [fontSize, baseUnit, settings.ctaSize, canvasType])
 
   return {
     dimensions,
