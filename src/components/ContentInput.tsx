@@ -1,12 +1,13 @@
 "use client";
 
+import { useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Smile, User, BadgeCheck, ArrowDown } from "lucide-react";
-import type { PostSettings, HIGHLIGHT_COLORS } from "@/lib/types";
+import { MessageSquare, Smile, User, ArrowDown, Upload, Link, X } from "lucide-react";
+import { CTA_SIZES, type PostSettings, type CtaSize } from "@/lib/types";
 
 interface ContentInputProps {
   settings: PostSettings;
@@ -30,6 +31,7 @@ const HIGHLIGHT_COLOR_OPTIONS = [
 ];
 
 export function ContentInput({ settings, onSettingsChange }: ContentInputProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const characterCount = settings.content.length;
   const maxChars = 500;
   const isNearLimit = characterCount > maxChars * 0.8;
@@ -38,6 +40,25 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
 
   const insertEmoji = (emoji: string) => {
     onSettingsChange({ content: settings.content + emoji });
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        onSettingsChange({ creatorAvatar: dataUrl });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearAvatar = () => {
+    onSettingsChange({ creatorAvatar: "" });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   return (
@@ -73,20 +94,81 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
             </div>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-xs text-muted-foreground">Avatar URL</label>
-            <input
-              type="text"
-              placeholder="https://example.com/avatar.jpg"
-              value={settings.creatorAvatar}
-              onChange={(e) => onSettingsChange({ creatorAvatar: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
-            />
+          {/* Avatar Section */}
+          <div className="space-y-2">
+            <label className="text-xs text-muted-foreground">Profile Picture</label>
+            
+            {settings.creatorAvatar ? (
+              <div className="flex items-center gap-3">
+                <img
+                  src={settings.creatorAvatar}
+                  alt="Avatar preview"
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAvatar}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Remove
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                {/* Upload Button */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex-1"
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload
+                </Button>
+                
+                {/* URL Input */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex-1">
+                      <Link className="h-4 w-4 mr-2" />
+                      URL
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-3" align="start">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium">Image URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://example.com/avatar.jpg"
+                        value={settings.creatorAvatar}
+                        onChange={(e) => onSettingsChange({ creatorAvatar: e.target.value })}
+                        className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Paste the URL of your profile picture
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
-              <BadgeCheck className="h-4 w-4 text-blue-500" />
+              <svg width="16" height="16" viewBox="0 0 22 22" fill="none">
+                <circle cx="11" cy="11" r="10" fill="#1D9BF0"/>
+                <path d="M9.64 15.67l-3.64-3.64 1.41-1.41 2.23 2.23 5.23-5.23 1.41 1.41-6.64 6.64z" fill="white"/>
+              </svg>
               <span className="text-sm">Verified Badge</span>
             </div>
             <Toggle
@@ -161,12 +243,12 @@ Example: Most people think they need more time. They don't. They need more focus
       {/* Highlight Text */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">
-          Highlight Text <span className="text-muted-foreground font-normal">(optional)</span>
+          Highlight Text <span className="text-muted-foreground font-normal">(color a word/phrase)</span>
         </label>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Text to highlight in color"
+            placeholder="e.g. Plots of Land"
             value={settings.highlightText}
             onChange={(e) => onSettingsChange({ highlightText: e.target.value })}
             className="flex-1 px-3 py-2 text-sm rounded-md border border-input bg-background"
@@ -174,7 +256,7 @@ Example: Most people think they need more time. They don't. They need more focus
           <Popover>
             <PopoverTrigger asChild>
               <button
-                className="w-10 h-10 rounded-md border border-input"
+                className="w-10 h-10 rounded-md border border-input flex-shrink-0"
                 style={{ backgroundColor: settings.highlightColor }}
               />
             </PopoverTrigger>
@@ -213,21 +295,44 @@ Example: Most people think they need more time. They don't. They need more focus
       </div>
 
       {/* CTA Button */}
-      <div className="flex items-center justify-between py-3 px-4 bg-secondary/50 rounded-lg">
-        <div className="flex items-center gap-2">
-          <ArrowDown className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm">Show CTA Arrow Button</span>
+      <div className="space-y-2 p-3 bg-secondary/50 rounded-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ArrowDown className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">CTA Arrow Button</span>
+          </div>
+          <Toggle
+            pressed={settings.showCtaButton}
+            onPressedChange={(pressed) =>
+              onSettingsChange({ showCtaButton: pressed })
+            }
+            aria-label="Toggle CTA button"
+            className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+          >
+            {settings.showCtaButton ? "On" : "Off"}
+          </Toggle>
         </div>
-        <Toggle
-          pressed={settings.showCtaButton}
-          onPressedChange={(pressed) =>
-            onSettingsChange({ showCtaButton: pressed })
-          }
-          aria-label="Toggle CTA button"
-          className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-        >
-          {settings.showCtaButton ? "On" : "Off"}
-        </Toggle>
+        
+        {settings.showCtaButton && (
+          <div className="flex items-center gap-2 pt-2">
+            <span className="text-xs text-muted-foreground">Size:</span>
+            <div className="flex gap-1">
+              {(Object.keys(CTA_SIZES) as CtaSize[]).map((size) => (
+                <button
+                  key={size}
+                  onClick={() => onSettingsChange({ ctaSize: size })}
+                  className={`px-3 py-1 text-xs rounded-md transition-all ${
+                    settings.ctaSize === size
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary hover:bg-secondary/80"
+                  }`}
+                >
+                  {CTA_SIZES[size].name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Comment Pointer */}

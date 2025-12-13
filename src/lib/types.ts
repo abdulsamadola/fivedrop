@@ -25,6 +25,8 @@ export type GradientPreset =
 
 export type Platform = "facebook" | "linkedin" | "twitter" | "instagram" | "instagram-story";
 
+export type CtaSize = "sm" | "md" | "lg";
+
 export interface PlatformDimensions {
   width: number;
   height: number;
@@ -83,6 +85,7 @@ export interface PostSettings {
   creatorAvatar: string;
   showVerifiedBadge: boolean;
   showCtaButton: boolean;
+  ctaSize: CtaSize;
   highlightText: string;
   highlightColor: string;
 }
@@ -105,6 +108,7 @@ export const DEFAULT_SETTINGS: PostSettings = {
   creatorAvatar: "",
   showVerifiedBadge: true,
   showCtaButton: false,
+  ctaSize: "md",
   highlightText: "",
   highlightColor: "#FACC15",
 };
@@ -220,3 +224,9 @@ export const HIGHLIGHT_COLORS = [
   { name: "Orange", value: "#FB923C" },
   { name: "Blue", value: "#60A5FA" },
 ];
+
+export const CTA_SIZES: Record<CtaSize, { name: string; multiplier: number }> = {
+  sm: { name: "Small", multiplier: 0.8 },
+  md: { name: "Medium", multiplier: 1.1 },
+  lg: { name: "Large", multiplier: 1.4 },
+};
