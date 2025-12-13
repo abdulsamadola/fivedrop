@@ -212,6 +212,20 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return baseSize * multiplier
     }, [mainFontSize, settings.ctaSize])
 
+    // Determine if content is short (should group elements together)
+    const isShortContent = useMemo(() => {
+      const contentLength = settings.content.length
+      const hasSubtitle = !!settings.subtitle
+      const hasCTA = settings.showCtaButton
+      const hasPointer = settings.showCommentPointer
+      
+      // Content is "short" if it's under ~80 chars and no extras
+      if (contentLength < 80 && !hasSubtitle && !hasCTA && !hasPointer) return true
+      // Or under 120 chars with just one extra element
+      if (contentLength < 120 && !(hasSubtitle && hasCTA)) return true
+      return false
+    }, [settings.content, settings.subtitle, settings.showCtaButton, settings.showCommentPointer])
+
     // Fixed preview dimensions for consistency
     const previewWidth = isStory ? 240 : isSquare ? 340 : 400
     const previewHeight = Math.round(previewWidth / aspectRatio)
@@ -228,7 +242,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
           }}
         >
           <div
-            className={`${fontClass} h-full flex flex-col justify-between`}
+            className={`${fontClass} h-full flex flex-col ${isShortContent ? 'justify-center' : 'justify-between'}`}
             style={{
               color: settings.textColor,
               padding: isStory
@@ -239,7 +253,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             }}
           >
             {/* Top Section - Header for Creator Card */}
-            <div>
+            <div className={isShortContent && isCreatorCard ? 'mb-4' : ''}>
               {isCreatorCard &&
                 (settings.creatorName || settings.creatorHandle) && (
                   <div className="flex items-center gap-2">
@@ -296,7 +310,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             </div>
 
             {/* Middle Section - Main Content */}
-            <div className="flex-1 flex items-center py-2">
+            <div className={`${isShortContent ? 'py-4' : 'flex-1 flex items-center py-2'}`}>
               <div
                 className="leading-snug font-bold w-full"
                 style={{
