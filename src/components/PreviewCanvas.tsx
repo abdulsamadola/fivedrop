@@ -146,7 +146,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return baseSize
     }, [settings.creatorName, mainFontSize, dimensions.width])
 
-    // Calculate dynamic height based on content - SMART SIZING like the example
+    // Calculate dynamic height based on content - TIGHT FIT like the example
     const dynamicDimensions = useMemo(() => {
       const baseWidth = dimensions.width
       const contentLength = settings.content.length
@@ -162,42 +162,45 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
         return { width: baseWidth, height: dimensions.height }
       }
 
-      // Calculate lines needed (~20-22 chars per line at optimal font)
-      const charsPerLine = 22
-      const textLines = Math.ceil(contentLength / charsPerLine) + lineCount - 1
+      // Calculate lines needed based on font size and available width
+      // At ~40px font on 1080w with 7% padding each side = 86% usable = 928px
+      // Each char ~24px wide = ~38 chars per line
+      const charsPerLine = 28
+      const textLines = Math.max(1, Math.ceil(contentLength / charsPerLine) + lineCount - 1)
 
-      // Build height from components (all as % of width)
+      // Build height from actual components (tighter percentages)
       let h = 0
-      
-      // Top padding
-      h += baseWidth * 0.065
-      
-      // Header if present
-      if (hasHeader) h += baseWidth * 0.11
-      
-      // Gap after header
-      if (hasHeader) h += baseWidth * 0.05
-      
-      // Main content (each line ~5.5% of width)
-      h += textLines * baseWidth * 0.052
-      
-      // Subtitle
-      if (hasSubtitle) h += baseWidth * 0.07
-      
-      // Gap before CTA
-      if (hasCTA || hasPointer) h += baseWidth * 0.04
-      
-      // CTA button
-      if (hasCTA) h += baseWidth * 0.08
-      
-      // Comment pointer
-      if (hasPointer) h += baseWidth * 0.05
-      
-      // Bottom padding
-      h += baseWidth * 0.065
 
-      // Clamp between 55% and 120% of width
-      h = Math.max(baseWidth * 0.55, Math.min(baseWidth * 1.2, h))
+      // Top padding
+      h += baseWidth * 0.06
+
+      // Header if present (avatar ~60px + small gap)
+      if (hasHeader) h += baseWidth * 0.08
+
+      // Gap after header
+      if (hasHeader) h += baseWidth * 0.04
+
+      // Main content - each line at ~40px font = ~4% of 1080
+      h += textLines * baseWidth * 0.042
+
+      // Subtitle (smaller font)
+      if (hasSubtitle) h += baseWidth * 0.05
+
+      // Gap before CTA
+      if (hasCTA || hasPointer) h += baseWidth * 0.03
+
+      // CTA button (~50px)
+      if (hasCTA) h += baseWidth * 0.06
+
+      // Comment pointer
+      if (hasPointer) h += baseWidth * 0.04
+
+      // Bottom padding
+      h += baseWidth * 0.06
+
+      // NO minimum clamp - let it be as short as content needs
+      // Only clamp maximum to 110% of width
+      h = Math.min(baseWidth * 1.1, h)
 
       return { width: baseWidth, height: Math.round(h) }
     }, [
@@ -330,7 +333,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             }}
           >
             <div
-              className={`${fontClass} h-full flex flex-col justify-between`}
+              className={`${fontClass} h-full flex flex-col`}
               style={{
                 color: settings.textColor,
                 padding,
@@ -402,8 +405,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
               {/* Middle Section - Main Content */}
               <div
-                className="flex-1 flex items-center"
-                style={{ padding: `${dimensions.width * 0.02}px 0` }}
+                style={{ marginTop: `${dimensions.width * 0.03}px` }}
               >
                 <div
                   className="leading-snug font-bold w-full"
