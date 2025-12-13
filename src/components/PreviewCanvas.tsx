@@ -8,7 +8,39 @@ import {
   CTA_SIZES,
   type PostSettings,
 } from "@/lib/types";
-import { ArrowDown, BadgeCheck } from "lucide-react";
+import { ArrowDown } from "lucide-react";
+
+interface PreviewCanvasProps {
+  settings: PostSettings;
+}
+
+// Custom verified badge with thin white checkmark
+function VerifiedBadge({ size }: { size: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      {/* Flower/star shape background */}
+      <path
+        d="M12 2C10.9 2 10 2.9 10 4C10 2.9 9.1 2 8 2C6.9 2 6 2.9 6 4C4.9 4 4 4.9 4 6C2.9 6 2 6.9 2 8C2 9.1 2.9 10 4 10C2.9 10 2 10.9 2 12C2 13.1 2.9 14 4 14C2.9 14 2 14.9 2 16C2 17.1 2.9 18 4 18C4 19.1 4.9 20 6 20C6 21.1 6.9 22 8 22C9.1 22 10 21.1 10 20C10 21.1 10.9 22 12 22C13.1 22 14 21.1 14 20C14 21.1 14.9 22 16 22C17.1 22 18 21.1 18 20C19.1 20 20 19.1 20 18C21.1 18 22 17.1 22 16C22 14.9 21.1 14 20 14C21.1 14 22 13.1 22 12C22 10.9 21.1 10 20 10C21.1 10 22 9.1 22 8C22 6.9 21.1 6 20 6C20 4.9 19.1 4 18 4C18 2.9 17.1 2 16 2C14.9 2 14 2.9 14 4C14 2.9 13.1 2 12 2Z"
+        fill="#1D9BF0"
+      />
+      {/* Thin checkmark */}
+      <path
+        d="M9.5 12.5L11 14L15 10"
+        stroke="white"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
 
 export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
   function PreviewCanvas({ settings }, ref) {
@@ -210,13 +242,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                       {settings.creatorName || "Your Name"}
                     </span>
                     {settings.showVerifiedBadge && (
-                      <BadgeCheck
-                        className="fill-[#1D9BF0] text-white"
-                        style={{
-                          width: `${nameFontSize * 1.2}px`,
-                          height: `${nameFontSize * 1.2}px`,
-                        }}
-                      />
+                      <VerifiedBadge size={nameFontSize * 1.3} />
                     )}
                   </div>
                   <span
