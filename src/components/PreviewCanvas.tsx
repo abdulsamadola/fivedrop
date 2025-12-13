@@ -14,29 +14,28 @@ interface PreviewCanvasProps {
   settings: PostSettings;
 }
 
-// Custom verified badge with thin white checkmark
+// Twitter/Facebook style verified badge - smooth rounded shape
 function VerifiedBadge({ size }: { size: number }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 0 22 22"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Flower/star shape background */}
+      {/* Smooth rounded seal/badge shape like Twitter */}
       <path
-        d="M12 2C10.9 2 10 2.9 10 4C10 2.9 9.1 2 8 2C6.9 2 6 2.9 6 4C4.9 4 4 4.9 4 6C2.9 6 2 6.9 2 8C2 9.1 2.9 10 4 10C2.9 10 2 10.9 2 12C2 13.1 2.9 14 4 14C2.9 14 2 14.9 2 16C2 17.1 2.9 18 4 18C4 19.1 4.9 20 6 20C6 21.1 6.9 22 8 22C9.1 22 10 21.1 10 20C10 21.1 10.9 22 12 22C13.1 22 14 21.1 14 20C14 21.1 14.9 22 16 22C17.1 22 18 21.1 18 20C19.1 20 20 19.1 20 18C21.1 18 22 17.1 22 16C22 14.9 21.1 14 20 14C21.1 14 22 13.1 22 12C22 10.9 21.1 10 20 10C21.1 10 22 9.1 22 8C22 6.9 21.1 6 20 6C20 4.9 19.1 4 18 4C18 2.9 17.1 2 16 2C14.9 2 14 2.9 14 4C14 2.9 13.1 2 12 2Z"
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M11 0C9.735 0 8.628.632 8.016 1.6C7.228 1.143 6.296 1 5.39 1.196C4.088 1.484 3.016 2.484 2.664 3.812C2.312 5.14 2.68 6.548 3.64 7.568C2.924 8.252 2.44 9.172 2.312 10.2C2.144 11.572 2.68 12.936 3.72 13.856C3.28 14.756 3.18 15.78 3.456 16.74C3.82 18.032 4.82 19.068 6.096 19.5C6.192 20.552 6.68 21.54 7.472 22.256L7.476 22.256C8.488 23.148 9.848 23.544 11.172 23.344C11.448 23.344 11.724 23.304 12 23.252C12.276 23.304 12.552 23.344 12.828 23.344C14.152 23.544 15.512 23.148 16.524 22.256L16.528 22.256C17.32 21.54 17.808 20.552 17.904 19.5C19.18 19.068 20.18 18.032 20.544 16.74C20.82 15.78 20.72 14.756 20.28 13.856C21.32 12.936 21.856 11.572 21.688 10.2C21.56 9.172 21.076 8.252 20.36 7.568C21.32 6.548 21.688 5.14 21.336 3.812C20.984 2.484 19.912 1.484 18.61 1.196C17.704 1 16.772 1.143 15.984 1.6C15.372.632 14.265 0 13 0H11Z"
         fill="#1D9BF0"
+        transform="translate(0, -0.5) scale(1)"
       />
-      {/* Thin checkmark */}
+      {/* White checkmark - thin and elegant */}
       <path
-        d="M9.5 12.5L11 14L15 10"
-        stroke="white"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
+        d="M15.67 7.52L9.9 13.29L7.33 10.72C7.14 10.53 6.84 10.53 6.65 10.72C6.46 10.91 6.46 11.21 6.65 11.4L9.56 14.31C9.75 14.5 10.05 14.5 10.24 14.31L16.35 8.2C16.54 8.01 16.54 7.71 16.35 7.52C16.16 7.33 15.86 7.33 15.67 7.52Z"
+        fill="white"
       />
     </svg>
   );
@@ -59,7 +58,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
     const isCreatorCard = settings.format === "creator-card";
 
     // Smarter font size calculation based on content length
-    const { mainFontSize, subtitleFontSize, pointerFontSize, nameFontSize, handleFontSize } = useMemo(() => {
+    const { mainFontSize, subtitleFontSize, pointerFontSize, handleFontSize } = useMemo(() => {
       const contentLength = settings.content.length;
       const wordCount = settings.content.split(/\s+/).filter(w => w).length;
       const lineCount = settings.content.split('\n').length;
@@ -116,10 +115,21 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
         mainFontSize: main,
         subtitleFontSize: Math.max(Math.floor(main * 0.55), 12),
         pointerFontSize: Math.max(Math.floor(main * 0.45), 11),
-        nameFontSize: Math.max(Math.floor(main * 0.55), 14),
         handleFontSize: Math.max(Math.floor(main * 0.4), 11),
       };
     }, [settings.content, settings.platform, settings.format, isSquare, isStory, isCreatorCard]);
+
+    // Auto-scale name font size based on name length
+    const nameFontSize = useMemo(() => {
+      const nameLength = settings.creatorName?.length || 0;
+      const baseSize = Math.max(Math.floor(mainFontSize * 0.55), 14);
+      
+      // Scale down name font if name is too long
+      if (nameLength > 25) return Math.max(baseSize * 0.7, 12);
+      if (nameLength > 20) return Math.max(baseSize * 0.8, 12);
+      if (nameLength > 15) return Math.max(baseSize * 0.9, 13);
+      return baseSize;
+    }, [settings.creatorName, mainFontSize]);
 
     // Apply highlight to content - works for all formats
     const applyHighlight = (text: string): React.ReactNode => {
@@ -233,20 +243,20 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   </div>
                 )}
                 {/* Name & Handle */}
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-1.5">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span
-                      className="font-semibold truncate"
+                      className="font-semibold"
                       style={{ fontSize: `${nameFontSize}px` }}
                     >
                       {settings.creatorName || "Your Name"}
                     </span>
                     {settings.showVerifiedBadge && (
-                      <VerifiedBadge size={nameFontSize * 1.3} />
+                      <VerifiedBadge size={Math.max(nameFontSize * 1.1, 16)} />
                     )}
                   </div>
                   <span
-                    className="opacity-60 truncate"
+                    className="opacity-60"
                     style={{ fontSize: `${handleFontSize}px` }}
                   >
                     {settings.creatorHandle ? `@${settings.creatorHandle.replace("@", "")}` : "@handle"}
