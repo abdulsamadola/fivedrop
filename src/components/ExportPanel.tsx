@@ -84,9 +84,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
       {/* Mobile-friendly notice */}
       <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg text-xs text-muted-foreground">
         <Smartphone className="h-4 w-4 mt-0.5 shrink-0" />
-        <span>
-          What you see is what you get - exports at full resolution.
-        </span>
+        <span>What you see is what you get - exports at full resolution.</span>
       </div>
 
       {/* Quick Export - Current Platform */}

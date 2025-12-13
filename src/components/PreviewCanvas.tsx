@@ -62,7 +62,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return maxPreviewWidth / dimensions.width
     }, [dimensions.width, isSquare, isStory])
 
-    // Font sizes based on FULL export dimensions (not preview size)
+    // Font sizes based on FULL export dimensions - REDUCED for better margins
     const { mainFontSize, subtitleFontSize, pointerFontSize, handleFontSize } =
       useMemo(() => {
         const contentLength = settings.content.length
@@ -70,57 +70,57 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
         const lineCount = settings.content.split('\n').length
         const complexityScore = contentLength + wordCount * 2 + lineCount * 10
 
-        // Base size relative to canvas width (for 1080px width)
+        // Base size relative to canvas width - SMALLER for proper margins
         const baseWidth = dimensions.width
         let main: number
 
         if (isStory) {
           // Story format (1080x1920) - taller canvas
-          if (complexityScore < 60) main = baseWidth * 0.065
-          else if (complexityScore < 100) main = baseWidth * 0.055
-          else if (complexityScore < 150) main = baseWidth * 0.048
-          else if (complexityScore < 220) main = baseWidth * 0.042
-          else if (complexityScore < 300) main = baseWidth * 0.036
-          else if (complexityScore < 400) main = baseWidth * 0.032
-          else if (complexityScore < 500) main = baseWidth * 0.028
-          else main = baseWidth * 0.024
+          if (complexityScore < 60) main = baseWidth * 0.048
+          else if (complexityScore < 100) main = baseWidth * 0.042
+          else if (complexityScore < 150) main = baseWidth * 0.036
+          else if (complexityScore < 220) main = baseWidth * 0.032
+          else if (complexityScore < 300) main = baseWidth * 0.028
+          else if (complexityScore < 400) main = baseWidth * 0.024
+          else if (complexityScore < 500) main = baseWidth * 0.021
+          else main = baseWidth * 0.018
         } else if (isSquare) {
-          // Square format (1080x1080)
-          if (complexityScore < 50) main = baseWidth * 0.058
-          else if (complexityScore < 80) main = baseWidth * 0.050
-          else if (complexityScore < 120) main = baseWidth * 0.044
-          else if (complexityScore < 180) main = baseWidth * 0.038
-          else if (complexityScore < 250) main = baseWidth * 0.034
-          else if (complexityScore < 350) main = baseWidth * 0.030
-          else if (complexityScore < 450) main = baseWidth * 0.026
-          else if (complexityScore < 600) main = baseWidth * 0.023
-          else main = baseWidth * 0.020
+          // Square format (1080x1080) - reduced by ~25%
+          if (complexityScore < 50) main = baseWidth * 0.042
+          else if (complexityScore < 80) main = baseWidth * 0.038
+          else if (complexityScore < 120) main = baseWidth * 0.034
+          else if (complexityScore < 180) main = baseWidth * 0.030
+          else if (complexityScore < 250) main = baseWidth * 0.026
+          else if (complexityScore < 350) main = baseWidth * 0.023
+          else if (complexityScore < 450) main = baseWidth * 0.020
+          else if (complexityScore < 600) main = baseWidth * 0.018
+          else main = baseWidth * 0.016
         } else {
-          // Landscape formats (1200x630)
-          if (complexityScore < 50) main = baseWidth * 0.048
-          else if (complexityScore < 80) main = baseWidth * 0.042
-          else if (complexityScore < 120) main = baseWidth * 0.036
-          else if (complexityScore < 180) main = baseWidth * 0.032
-          else if (complexityScore < 250) main = baseWidth * 0.028
-          else if (complexityScore < 350) main = baseWidth * 0.025
-          else if (complexityScore < 450) main = baseWidth * 0.022
-          else main = baseWidth * 0.020
+          // Landscape formats (1200x630) - reduced
+          if (complexityScore < 50) main = baseWidth * 0.038
+          else if (complexityScore < 80) main = baseWidth * 0.034
+          else if (complexityScore < 120) main = baseWidth * 0.030
+          else if (complexityScore < 180) main = baseWidth * 0.026
+          else if (complexityScore < 250) main = baseWidth * 0.023
+          else if (complexityScore < 350) main = baseWidth * 0.020
+          else if (complexityScore < 450) main = baseWidth * 0.018
+          else main = baseWidth * 0.016
         }
 
         // Adjust for format type
         if (settings.format === 'long-thought') {
-          main = Math.max(main * 0.92, baseWidth * 0.018)
+          main = Math.max(main * 0.90, baseWidth * 0.015)
         } else if (settings.format === 'list-drop') {
-          main = Math.max(main * 0.95, baseWidth * 0.018)
+          main = Math.max(main * 0.92, baseWidth * 0.015)
         } else if (isCreatorCard) {
-          main = Math.max(main * 0.95, baseWidth * 0.018)
+          main = Math.max(main * 0.92, baseWidth * 0.015)
         }
 
         return {
           mainFontSize: Math.round(main),
-          subtitleFontSize: Math.round(Math.max(main * 0.5, baseWidth * 0.016)),
-          pointerFontSize: Math.round(Math.max(main * 0.42, baseWidth * 0.014)),
-          handleFontSize: Math.round(Math.max(main * 0.38, baseWidth * 0.014)),
+          subtitleFontSize: Math.round(Math.max(main * 0.48, baseWidth * 0.014)),
+          pointerFontSize: Math.round(Math.max(main * 0.40, baseWidth * 0.012)),
+          handleFontSize: Math.round(Math.max(main * 0.36, baseWidth * 0.012)),
         }
       }, [
         settings.content,
@@ -134,7 +134,9 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
     // Name font size scaled for export dimensions
     const nameFontSize = useMemo(() => {
       const nameLength = settings.creatorName?.length || 0
-      const baseSize = Math.round(Math.max(mainFontSize * 0.52, dimensions.width * 0.022))
+      const baseSize = Math.round(
+        Math.max(mainFontSize * 0.52, dimensions.width * 0.022)
+      )
 
       if (nameLength > 25) return Math.round(baseSize * 0.72)
       if (nameLength > 20) return Math.round(baseSize * 0.82)
@@ -149,7 +151,8 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       const hasCTA = settings.showCtaButton
       const hasPointer = settings.showCommentPointer
 
-      if (contentLength < 80 && !hasSubtitle && !hasCTA && !hasPointer) return true
+      if (contentLength < 80 && !hasSubtitle && !hasCTA && !hasPointer)
+        return true
       if (contentLength < 120 && !(hasSubtitle && hasCTA)) return true
       return false
     }, [
@@ -192,10 +195,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             .split(/\n|(?=\d+[.\)]\s)/)
             .filter((line) => line.trim())
           return lines.map((line, i) => (
-            <div key={i} className="flex items-start" style={{ gap: `${dimensions.width * 0.015}px` }}>
-              <span className="opacity-60 font-medium shrink-0">
-                {i + 1}.
-              </span>
+            <div
+              key={i}
+              className="flex items-start"
+              style={{ gap: `${dimensions.width * 0.015}px` }}
+            >
+              <span className="opacity-60 font-medium shrink-0">{i + 1}.</span>
               <span>
                 {applyHighlight(line.replace(/^\d+[.\)]\s*/, '').trim())}
               </span>
@@ -206,10 +211,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             <div className="relative">
               <span
                 className="absolute opacity-40"
-                style={{ 
+                style={{
                   fontSize: `${mainFontSize * 0.8}px`,
                   left: `-${dimensions.width * 0.045}px`,
-                  top: 0
+                  top: 0,
                 }}
               >
                 🧵
@@ -229,28 +234,30 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       dimensions.width,
     ])
 
-    // CTA button size based on export dimensions
+    // CTA button size based on export dimensions - smaller
     const ctaSize = useMemo(() => {
-      const baseSize = Math.max(mainFontSize * 1.1, dimensions.width * 0.045)
+      const baseSize = Math.max(mainFontSize * 1.0, dimensions.width * 0.04)
       const multiplier = CTA_SIZES[settings.ctaSize].multiplier
       return Math.round(baseSize * multiplier)
     }, [mainFontSize, settings.ctaSize, dimensions.width])
 
-    // Avatar size
-    const avatarSize = Math.round(Math.max(mainFontSize * 1.6, dimensions.width * 0.065))
+    // Avatar size - proportional
+    const avatarSize = Math.round(
+      Math.max(mainFontSize * 1.5, dimensions.width * 0.055)
+    )
 
-    // Padding based on export dimensions
+    // Padding based on export dimensions - increased for better margins
     const padding = useMemo(() => {
       const w = dimensions.width
-      if (isStory) return `${w * 0.07}px ${w * 0.065}px`
-      if (isSquare) return `${w * 0.055}px ${w * 0.06}px`
-      return `${w * 0.05}px ${w * 0.055}px`
+      if (isStory) return `${w * 0.08}px ${w * 0.07}px`
+      if (isSquare) return `${w * 0.065}px ${w * 0.07}px`
+      return `${w * 0.055}px ${w * 0.06}px`
     }, [dimensions.width, isSquare, isStory])
 
     return (
-      <div 
+      <div
         className="w-full flex justify-center overflow-hidden"
-        style={{ 
+        style={{
           maxHeight: isStory ? '450px' : isSquare ? '350px' : '280px',
         }}
       >
@@ -281,10 +288,21 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               }}
             >
               {/* Top Section - Header for Creator Card */}
-              <div className={isShortContent && isCreatorCard ? '' : ''} style={{ marginBottom: isShortContent && isCreatorCard ? `${dimensions.width * 0.03}px` : 0 }}>
+              <div
+                className={isShortContent && isCreatorCard ? '' : ''}
+                style={{
+                  marginBottom:
+                    isShortContent && isCreatorCard
+                      ? `${dimensions.width * 0.03}px`
+                      : 0,
+                }}
+              >
                 {isCreatorCard &&
                   (settings.creatorName || settings.creatorHandle) && (
-                    <div className="flex items-center" style={{ gap: `${dimensions.width * 0.018}px` }}>
+                    <div
+                      className="flex items-center"
+                      style={{ gap: `${dimensions.width * 0.018}px` }}
+                    >
                       {/* Avatar */}
                       {settings.creatorAvatar ? (
                         <img
@@ -306,12 +324,16 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                             fontSize: `${avatarSize * 0.45}px`,
                           }}
                         >
-                          {settings.creatorName?.charAt(0)?.toUpperCase() || '?'}
+                          {settings.creatorName?.charAt(0)?.toUpperCase() ||
+                            '?'}
                         </div>
                       )}
                       {/* Name & Handle */}
                       <div className="flex flex-col min-w-0 flex-1">
-                        <div className="flex items-center flex-wrap" style={{ gap: `${dimensions.width * 0.008}px` }}>
+                        <div
+                          className="flex items-center flex-wrap"
+                          style={{ gap: `${dimensions.width * 0.008}px` }}
+                        >
                           <span
                             className="font-semibold"
                             style={{ fontSize: `${nameFontSize}px` }}
@@ -339,8 +361,14 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
               {/* Middle Section - Main Content */}
               <div
-                className={`${isShortContent ? '' : 'flex-1 flex items-center'}`}
-                style={{ padding: isShortContent ? `${dimensions.width * 0.025}px 0` : `${dimensions.width * 0.015}px 0` }}
+                className={`${
+                  isShortContent ? '' : 'flex-1 flex items-center'
+                }`}
+                style={{
+                  padding: isShortContent
+                    ? `${dimensions.width * 0.025}px 0`
+                    : `${dimensions.width * 0.015}px 0`,
+                }}
               >
                 <div
                   className="leading-snug font-bold w-full"
@@ -389,7 +417,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
                 {/* CTA Button */}
                 {settings.showCtaButton && (
-                  <div 
+                  <div
                     className="flex justify-center"
                     style={{ paddingTop: `${dimensions.width * 0.015}px` }}
                   >
