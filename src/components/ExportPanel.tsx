@@ -30,7 +30,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
 
     try {
       const element = previewRef.current
-      
+
       // Get actual rendered size (dynamic sizing)
       const actualWidth = element.offsetWidth
       const actualHeight = element.offsetHeight

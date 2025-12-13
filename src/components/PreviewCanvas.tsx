@@ -146,53 +146,60 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return baseSize
     }, [settings.creatorName, mainFontSize, dimensions.width])
 
-    // Calculate dynamic height based on content - SMART SIZING
+    // Calculate dynamic height based on content - SMART SIZING like the example
     const dynamicDimensions = useMemo(() => {
       const baseWidth = dimensions.width
       const contentLength = settings.content.length
-      const wordCount = settings.content.split(/\s+/).filter((w) => w).length
       const lineCount = settings.content.split('\n').length
-      const hasHeader = isCreatorCard && (settings.creatorName || settings.creatorHandle)
+      const hasHeader =
+        isCreatorCard && (settings.creatorName || settings.creatorHandle)
       const hasSubtitle = !!settings.subtitle
       const hasCTA = settings.showCtaButton
       const hasPointer = settings.showCommentPointer
 
-      // Estimate content height as ratio of width
-      let heightRatio: number
-
-      // Base ratio from content complexity
-      const complexity = contentLength + wordCount * 3 + lineCount * 15
-
-      if (complexity < 50) heightRatio = 0.65
-      else if (complexity < 80) heightRatio = 0.75
-      else if (complexity < 120) heightRatio = 0.85
-      else if (complexity < 180) heightRatio = 0.95
-      else if (complexity < 250) heightRatio = 1.0
-      else if (complexity < 350) heightRatio = 1.1
-      else heightRatio = 1.2
-
-      // Add space for extras
-      if (hasHeader) heightRatio += 0.12
-      if (hasSubtitle) heightRatio += 0.08
-      if (hasCTA) heightRatio += 0.1
-      if (hasPointer) heightRatio += 0.06
-
-      // Clamp to reasonable bounds
-      heightRatio = Math.max(0.6, Math.min(1.5, heightRatio))
-
-      // For story format, don't reduce height
-      if (isStory) {
+      // For story/landscape, keep original dimensions
+      if (isStory || (!isSquare && !isStory)) {
         return { width: baseWidth, height: dimensions.height }
       }
 
-      // For landscape, keep original
-      if (!isSquare && !isStory) {
-        return { width: baseWidth, height: dimensions.height }
-      }
+      // Calculate lines needed (~20-22 chars per line at optimal font)
+      const charsPerLine = 22
+      const textLines = Math.ceil(contentLength / charsPerLine) + lineCount - 1
 
-      // For square, make it dynamic
-      const dynamicHeight = Math.round(baseWidth * heightRatio)
-      return { width: baseWidth, height: dynamicHeight }
+      // Build height from components (all as % of width)
+      let h = 0
+      
+      // Top padding
+      h += baseWidth * 0.065
+      
+      // Header if present
+      if (hasHeader) h += baseWidth * 0.11
+      
+      // Gap after header
+      if (hasHeader) h += baseWidth * 0.05
+      
+      // Main content (each line ~5.5% of width)
+      h += textLines * baseWidth * 0.052
+      
+      // Subtitle
+      if (hasSubtitle) h += baseWidth * 0.07
+      
+      // Gap before CTA
+      if (hasCTA || hasPointer) h += baseWidth * 0.04
+      
+      // CTA button
+      if (hasCTA) h += baseWidth * 0.08
+      
+      // Comment pointer
+      if (hasPointer) h += baseWidth * 0.05
+      
+      // Bottom padding
+      h += baseWidth * 0.065
+
+      // Clamp between 55% and 120% of width
+      h = Math.max(baseWidth * 0.55, Math.min(baseWidth * 1.2, h))
+
+      return { width: baseWidth, height: Math.round(h) }
     }, [
       dimensions,
       settings.content,
@@ -330,15 +337,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               }}
             >
               {/* Top Section - Header for Creator Card */}
-              <div
-                className={isShortContent && isCreatorCard ? '' : ''}
-                style={{
-                  marginBottom:
-                    isShortContent && isCreatorCard
-                      ? `${dimensions.width * 0.03}px`
-                      : 0,
-                }}
-              >
+              <div>
                 {isCreatorCard &&
                   (settings.creatorName || settings.creatorHandle) && (
                     <div
@@ -403,14 +402,8 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
               {/* Middle Section - Main Content */}
               <div
-                className={`${
-                  isShortContent ? '' : 'flex-1 flex items-center'
-                }`}
-                style={{
-                  padding: isShortContent
-                    ? `${dimensions.width * 0.025}px 0`
-                    : `${dimensions.width * 0.015}px 0`,
-                }}
+                className="flex-1 flex items-center"
+                style={{ padding: `${dimensions.width * 0.02}px 0` }}
               >
                 <div
                   className="leading-snug font-bold w-full"
