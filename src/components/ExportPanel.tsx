@@ -1,42 +1,44 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Download, Loader2, Check, Smartphone } from "lucide-react";
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Download, Loader2, Check, Smartphone } from 'lucide-react'
 import {
   PLATFORM_DIMENSIONS,
   type Platform,
   type PostSettings,
-} from "@/lib/types";
-import { toPng } from "html-to-image";
+} from '@/lib/types'
+import { toPng } from 'html-to-image'
 
 interface ExportPanelProps {
-  settings: PostSettings;
-  previewRef: React.RefObject<HTMLDivElement | null>;
+  settings: PostSettings
+  previewRef: React.RefObject<HTMLDivElement | null>
 }
 
 export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportedPlatform, setExportedPlatform] = useState<Platform | null>(null);
+  const [isExporting, setIsExporting] = useState(false)
+  const [exportedPlatform, setExportedPlatform] = useState<Platform | null>(
+    null
+  )
 
   const handleExport = async (platform: Platform) => {
-    if (!previewRef.current) return;
+    if (!previewRef.current) return
 
-    setIsExporting(true);
-    setExportedPlatform(null);
+    setIsExporting(true)
+    setExportedPlatform(null)
 
     try {
-      const dimensions = PLATFORM_DIMENSIONS[platform];
-      const element = previewRef.current;
-      
+      const dimensions = PLATFORM_DIMENSIONS[platform]
+      const element = previewRef.current
+
       // Get current element size
-      const rect = element.getBoundingClientRect();
-      
+      const rect = element.getBoundingClientRect()
+
       // Calculate scale factor to reach target dimensions
-      const scaleX = dimensions.width / rect.width;
-      const scaleY = dimensions.height / rect.height;
-      
+      const scaleX = dimensions.width / rect.width
+      const scaleY = dimensions.height / rect.height
+
       const dataUrl = await toPng(element, {
         width: dimensions.width,
         height: dimensions.height,
@@ -45,34 +47,40 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         pixelRatio: 1,
         style: {
           transform: `scale(${scaleX}, ${scaleY})`,
-          transformOrigin: "top left",
+          transformOrigin: 'top left',
         },
-      });
+      })
 
       // Create and trigger download
-      const link = document.createElement("a");
-      link.download = `fivedrop-${platform}-${Date.now()}.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const link = document.createElement('a')
+      link.download = `fivedrop-${platform}-${Date.now()}.png`
+      link.href = dataUrl
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
 
-      setExportedPlatform(platform);
-      setTimeout(() => setExportedPlatform(null), 2000);
+      setExportedPlatform(platform)
+      setTimeout(() => setExportedPlatform(null), 2000)
     } catch (error) {
-      console.error("Export failed:", error);
-      alert("Export failed. Please try again.");
+      console.error('Export failed:', error)
+      alert('Export failed. Please try again.')
     } finally {
-      setIsExporting(false);
+      setIsExporting(false)
     }
-  };
+  }
 
-  const currentPlatform = settings.platform;
-  const currentDimensions = PLATFORM_DIMENSIONS[currentPlatform];
+  const currentPlatform = settings.platform
+  const currentDimensions = PLATFORM_DIMENSIONS[currentPlatform]
 
   // Platform order - square first for mobile
-  const platformOrder: Platform[] = ["instagram", "instagram-story", "facebook", "linkedin", "twitter"];
-  const otherPlatforms = platformOrder.filter(p => p !== currentPlatform);
+  const platformOrder: Platform[] = [
+    'instagram',
+    'instagram-story',
+    'facebook',
+    'linkedin',
+    'twitter',
+  ]
+  const otherPlatforms = platformOrder.filter((p) => p !== currentPlatform)
 
   return (
     <div className="space-y-4">
@@ -121,7 +129,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         <p className="text-xs text-muted-foreground">Other sizes:</p>
         <div className="grid grid-cols-2 gap-2">
           {otherPlatforms.map((key) => {
-            const info = PLATFORM_DIMENSIONS[key];
+            const info = PLATFORM_DIMENSIONS[key]
             return (
               <Button
                 key={key}
@@ -138,7 +146,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
                 )}
                 {info.name}
               </Button>
-            );
+            )
           })}
         </div>
       </div>
@@ -149,5 +157,5 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         </p>
       )}
     </div>
-  );
+  )
 }
