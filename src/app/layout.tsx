@@ -6,6 +6,7 @@ import {
   Playfair_Display,
   JetBrains_Mono,
 } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/react'
 import './globals.css'
 
 const geistSans = Geist({
@@ -141,6 +142,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${dmSans.variable} ${sora.variable} ${playfair.variable} ${jetbrains.variable} antialiased min-h-screen`}
       >
         {children}
+        <Analytics />
       </body>
     </html>
   )

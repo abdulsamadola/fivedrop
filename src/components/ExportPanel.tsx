@@ -100,11 +100,15 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
 
   const canExport = settings.content.trim().length > 0
 
-  // Short platform names for mobile
-  const getShortName = (platform: Platform) => {
+  // Clean platform names for buttons
+  const getDisplayName = (platform: Platform) => {
     switch (platform) {
       case 'facebook':
         return 'Facebook'
+      case 'facebook-portrait':
+        return 'Portrait'
+      case 'facebook-square':
+        return 'Square'
       case 'linkedin':
         return 'LinkedIn'
       case 'twitter':
@@ -156,7 +160,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
       <Button
         onClick={() => handleExport(currentPlatform)}
         disabled={isExporting || !canExport}
-        className="w-full h-12 text-sm sm:text-base font-medium"
+        className="w-full h-12 text-base font-medium"
         size="lg"
       >
         {isExporting ? (
@@ -172,12 +176,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         ) : (
           <>
             <Download className="mr-2 h-5 w-5" />
-            <span className="hidden sm:inline">
-              Download for {currentDimensions.name}
-            </span>
-            <span className="sm:hidden">
-              Download · {getShortName(currentPlatform)}
-            </span>
+            Download for {getDisplayName(currentPlatform)}
           </>
         )}
       </Button>
@@ -206,7 +205,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
                 ) : (
                   <Download className="h-3 w-3" />
                 )}
-                <span>{getShortName(platformKey)}</span>
+                <span>{getDisplayName(platformKey)}</span>
                 <span className="text-muted-foreground text-[10px]">
                   {platformInfo.aspectRatio}
                 </span>

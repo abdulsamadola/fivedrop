@@ -54,9 +54,9 @@ export const PLATFORM_DIMENSIONS: Record<Platform, PlatformDimensions> = {
     "facebook-portrait": {
         width: 1080,
         height: 1350,
-        name: "Facebook Portrait",
+        name: "Portrait",
         aspectRatio: "4:5",
-        description: "Tall portrait format for maximum feed visibility",
+        description: "Tall portrait format for maximum feed visibility across platforms",
     },
     "facebook-square": {
         width: 1080,
