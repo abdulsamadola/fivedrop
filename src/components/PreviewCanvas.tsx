@@ -173,8 +173,9 @@ function useSmartScaling(settings: PostSettings) {
       main: Math.round(mainSize),
       subtitle: Math.round(mainSize * 0.52),
       // Header elements use the stable headerSize, not mainSize
-      handle: Math.round(headerSize * 0.38),
-      name: Math.round(headerSize * 0.48),
+      // Increased sizes for more visual presence
+      handle: Math.round(headerSize * 0.44),
+      name: Math.round(headerSize * 0.56),
       pointer: Math.round(mainSize * 0.45),
     }
   }, [width, canvasType, contentMetrics, settings.format])
@@ -206,8 +207,9 @@ function useSmartScaling(settings: PostSettings) {
   // Element sizes - avatar uses stable sizing for visual consistency
   const elementSizes = useMemo(() => {
     // Avatar size should be stable and prominent, based on canvas not content
-    const minAvatar = canvasType === 'landscape' ? baseUnit * 5.5 : baseUnit * 6
-    const avatarSize = Math.round(Math.max(fontSize.name * 1.8, minAvatar))
+    // Increased sizes for more visual presence
+    const minAvatar = canvasType === 'landscape' ? baseUnit * 7 : baseUnit * 7.5
+    const avatarSize = Math.round(Math.max(fontSize.name * 2.2, minAvatar))
 
     const ctaBaseSize = Math.round(Math.max(fontSize.main * 1.0, baseUnit * 4))
     const ctaMultiplier = CTA_SIZES[settings.ctaSize].multiplier
@@ -215,7 +217,7 @@ function useSmartScaling(settings: PostSettings) {
     return {
       avatar: avatarSize,
       cta: Math.round(ctaBaseSize * ctaMultiplier),
-      badge: Math.round(fontSize.name * 0.85),
+      badge: Math.round(fontSize.name * 0.9),
     }
   }, [fontSize, baseUnit, settings.ctaSize, canvasType])
 
@@ -460,84 +462,75 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   padding: `${spacing.padding.vertical}px ${spacing.padding.horizontal}px`,
                 }}
               >
-                {/* Header Section - Creator Card */}
-                {isCreatorCard &&
-                  (settings.creatorName || settings.creatorHandle) && (
-                    <div
-                      className="shrink-0"
-                      style={{ marginBottom: `${spacing.gap.medium}px` }}
-                    >
+                {/* Main Content Section - Profile card and content grouped together */}
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden justify-center">
+                  {/* Creator Card - now inside the centered container */}
+                  {isCreatorCard &&
+                    (settings.creatorName || settings.creatorHandle) && (
                       <div
-                        className="flex items-center"
-                        style={{ gap: `${spacing.gap.small}px` }}
+                        className="shrink-0"
+                        style={{ marginBottom: `${spacing.gap.medium}px` }}
                       >
-                        {/* Avatar */}
-                        {settings.creatorAvatar ? (
-                          <img
-                            src={settings.creatorAvatar}
-                            alt={settings.creatorName}
-                            className="rounded-full object-cover shrink-0"
-                            style={{
-                              width: `${elementSizes.avatar}px`,
-                              height: `${elementSizes.avatar}px`,
-                            }}
-                            crossOrigin="anonymous"
-                          />
-                        ) : (
-                          <div
-                            className="rounded-full bg-gray-600 flex items-center justify-center text-white font-bold shrink-0"
-                            style={{
-                              width: `${elementSizes.avatar}px`,
-                              height: `${elementSizes.avatar}px`,
-                              fontSize: `${elementSizes.avatar * 0.45}px`,
-                            }}
-                          >
-                            {settings.creatorName?.charAt(0)?.toUpperCase() ||
-                              '?'}
-                          </div>
-                        )}
-
-                        {/* Name & Handle */}
-                        <div className="flex flex-col min-w-0 flex-1">
-                          <div
-                            className="flex items-center flex-wrap"
-                            style={{ gap: `${spacing.gap.small * 0.5}px` }}
-                          >
-                            <span
-                              className="font-semibold"
-                              style={{ fontSize: `${fontSize.name}px` }}
+                        <div
+                          className="flex items-center"
+                          style={{ gap: `${spacing.gap.small * 1.2}px` }}
+                        >
+                          {/* Avatar */}
+                          {settings.creatorAvatar ? (
+                            <img
+                              src={settings.creatorAvatar}
+                              alt={settings.creatorName}
+                              className="rounded-full object-cover shrink-0"
+                              style={{
+                                width: `${elementSizes.avatar}px`,
+                                height: `${elementSizes.avatar}px`,
+                              }}
+                              crossOrigin="anonymous"
+                            />
+                          ) : (
+                            <div
+                              className="rounded-full bg-gray-600 flex items-center justify-center text-white font-bold shrink-0"
+                              style={{
+                                width: `${elementSizes.avatar}px`,
+                                height: `${elementSizes.avatar}px`,
+                                fontSize: `${elementSizes.avatar * 0.45}px`,
+                              }}
                             >
-                              {settings.creatorName || 'Your Name'}
+                              {settings.creatorName?.charAt(0)?.toUpperCase() ||
+                                '?'}
+                            </div>
+                          )}
+
+                          {/* Name & Handle */}
+                          <div className="flex flex-col min-w-0 flex-1">
+                            <div
+                              className="flex items-center flex-wrap"
+                              style={{ gap: `${spacing.gap.small * 0.6}px` }}
+                            >
+                              <span
+                                className="font-semibold"
+                                style={{ fontSize: `${fontSize.name}px` }}
+                              >
+                                {settings.creatorName || 'Your Name'}
+                              </span>
+                              {settings.showVerifiedBadge && (
+                                <VerifiedBadge size={elementSizes.badge} />
+                              )}
+                            </div>
+                            <span
+                              className="opacity-60"
+                              style={{ fontSize: `${fontSize.handle}px` }}
+                            >
+                              {settings.creatorHandle
+                                ? `@${settings.creatorHandle.replace('@', '')}`
+                                : '@handle'}
                             </span>
-                            {settings.showVerifiedBadge && (
-                              <VerifiedBadge size={elementSizes.badge} />
-                            )}
                           </div>
-                          <span
-                            className="opacity-60"
-                            style={{ fontSize: `${fontSize.handle}px` }}
-                          >
-                            {settings.creatorHandle
-                              ? `@${settings.creatorHandle.replace('@', '')}`
-                              : '@handle'}
-                          </span>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                {/* Main Content Section */}
-                <div
-                  className="flex-1 flex flex-col min-h-0 overflow-hidden"
-                  style={{
-                    justifyContent:
-                      scaling.canvasType === 'landscape' ? 'center' : 'flex-start',
-                    paddingTop:
-                      scaling.canvasType !== 'landscape' && isCreatorCard
-                        ? `${spacing.gap.medium}px`
-                        : 0,
-                  }}
-                >
+                  {/* Text Content */}
                   <div
                     className="font-bold leading-tight overflow-hidden"
                     style={{
