@@ -100,6 +100,24 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
 
   const canExport = settings.content.trim().length > 0
 
+  // Short platform names for mobile
+  const getShortName = (platform: Platform) => {
+    switch (platform) {
+      case 'facebook':
+        return 'Facebook'
+      case 'linkedin':
+        return 'LinkedIn'
+      case 'twitter':
+        return 'X/Twitter'
+      case 'instagram':
+        return 'Instagram'
+      case 'instagram-story':
+        return 'Story'
+      default:
+        return platform
+    }
+  }
+
   return (
     <div className="space-y-5">
       {/* Current platform info */}
@@ -138,7 +156,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
       <Button
         onClick={() => handleExport(currentPlatform)}
         disabled={isExporting || !canExport}
-        className="w-full h-12 text-base font-medium"
+        className="w-full h-12 text-sm sm:text-base font-medium"
         size="lg"
       >
         {isExporting ? (
@@ -154,7 +172,8 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         ) : (
           <>
             <Download className="mr-2 h-5 w-5" />
-            Download for {currentDimensions.name}
+            <span className="hidden sm:inline">Download for {currentDimensions.name}</span>
+            <span className="sm:hidden">Download · {getShortName(currentPlatform)}</span>
           </>
         )}
       </Button>
@@ -168,16 +187,6 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
           {otherPlatforms.map((platformKey) => {
             const platformInfo = PLATFORM_DIMENSIONS[platformKey]
             const isExported = exportedPlatform === platformKey
-
-            // Short, clear names
-            const displayName =
-              platformKey === 'instagram-story'
-                ? 'Story'
-                : platformKey === 'instagram'
-                ? 'Instagram'
-                : platformKey === 'twitter'
-                ? 'X/Twitter'
-                : platformKey.charAt(0).toUpperCase() + platformKey.slice(1)
 
             return (
               <Button
@@ -193,7 +202,7 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
                 ) : (
                   <Download className="h-3 w-3" />
                 )}
-                <span>{displayName}</span>
+                <span>{getShortName(platformKey)}</span>
                 <span className="text-muted-foreground text-[10px]">
                   {platformInfo.aspectRatio}
                 </span>
