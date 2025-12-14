@@ -60,9 +60,9 @@ function useSmartScaling(settings: PostSettings) {
 
   // Determine canvas type for scaling strategy
   const canvasType = useMemo(() => {
-    if (aspectRatio > 1.5) return 'landscape' // Facebook, LinkedIn, Twitter
-    if (aspectRatio < 0.7) return 'portrait' // Stories
-    return 'square' // Instagram
+    if (aspectRatio > 1.5) return 'landscape' // Facebook Landscape, LinkedIn, Twitter
+    if (aspectRatio < 0.85) return 'portrait' // Stories, Facebook Portrait (4:5 = 0.8)
+    return 'square' // Instagram, Facebook Square
   }, [aspectRatio])
 
   // Calculate content metrics with better granularity
@@ -186,15 +186,19 @@ function useSmartScaling(settings: PostSettings) {
     const horizontalPadding = width * (paddingPercent / 100)
     const verticalPadding = height * (paddingPercent / 100)
 
+    // For portrait/square formats, reduce gaps to prevent excessive spacing
+    // Portrait canvases have larger baseUnits, so we scale down the multipliers
+    const gapMultiplier = canvasType === 'landscape' ? 1 : 0.6
+
     return {
       padding: {
         horizontal: Math.round(horizontalPadding),
         vertical: Math.round(verticalPadding),
       },
       gap: {
-        small: Math.round(baseUnit * 1.5),
-        medium: Math.round(baseUnit * 3),
-        large: Math.round(baseUnit * 5),
+        small: Math.round(baseUnit * 1.5 * gapMultiplier),
+        medium: Math.round(baseUnit * 3 * gapMultiplier),
+        large: Math.round(baseUnit * 5 * gapMultiplier),
       },
     }
   }, [width, height, baseUnit, canvasType])
@@ -523,7 +527,17 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   )}
 
                 {/* Main Content Section */}
-                <div className="flex-1 flex flex-col justify-center min-h-0 overflow-hidden">
+                <div
+                  className="flex-1 flex flex-col min-h-0 overflow-hidden"
+                  style={{
+                    justifyContent:
+                      scaling.canvasType === 'landscape' ? 'center' : 'flex-start',
+                    paddingTop:
+                      scaling.canvasType !== 'landscape' && isCreatorCard
+                        ? `${spacing.gap.medium}px`
+                        : 0,
+                  }}
+                >
                   <div
                     className="font-bold leading-tight overflow-hidden"
                     style={{
