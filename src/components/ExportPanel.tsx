@@ -172,8 +172,12 @@ export function ExportPanel({ settings, previewRef }: ExportPanelProps) {
         ) : (
           <>
             <Download className="mr-2 h-5 w-5" />
-            <span className="hidden sm:inline">Download for {currentDimensions.name}</span>
-            <span className="sm:hidden">Download · {getShortName(currentPlatform)}</span>
+            <span className="hidden sm:inline">
+              Download for {currentDimensions.name}
+            </span>
+            <span className="sm:hidden">
+              Download · {getShortName(currentPlatform)}
+            </span>
           </>
         )}
       </Button>
