@@ -1,65 +1,79 @@
-"use client";
+'use client'
 
-import { useRef } from "react";
-import { Textarea } from "@/components/ui/textarea";
-import { Toggle } from "@/components/ui/toggle";
-import { Badge } from "@/components/ui/badge";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import { MessageSquare, Smile, User, ArrowDown, Upload, Link, X } from "lucide-react";
-import { CTA_SIZES, type PostSettings, type CtaSize } from "@/lib/types";
+import { useRef } from 'react'
+import { Textarea } from '@/components/ui/textarea'
+import { Toggle } from '@/components/ui/toggle'
+import { Badge } from '@/components/ui/badge'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import {
+  MessageSquare,
+  Smile,
+  User,
+  ArrowDown,
+  Upload,
+  Link,
+  X,
+  Plus,
+  Trash2,
+} from 'lucide-react'
+import {
+  CTA_SIZES,
+  HIGHLIGHT_COLORS,
+  type PostSettings,
+  type CtaSize,
+  type HighlightEntry,
+} from '@/lib/types'
 
 interface ContentInputProps {
-  settings: PostSettings;
-  onSettingsChange: (settings: Partial<PostSettings>) => void;
+  settings: PostSettings
+  onSettingsChange: (settings: Partial<PostSettings>) => void
 }
 
 const EMOJI_GROUPS = {
-  "Attention": ["👇", "⬇️", "🔥", "⚠️", "🚨", "💡", "✨", "⭐"],
-  "Actions": ["👉", "➡️", "📌", "🎯", "💪", "🙌", "👏", "🤝"],
-  "Emotions": ["🤔", "😮", "🤯", "😱", "💭", "❤️", "💯", "🔑"],
-  "Objects": ["📈", "📉", "💰", "🎁", "📚", "🧵", "📋", "✅"],
-};
+  Attention: ['👇', '⬇️', '🔥', '⚠️', '🚨', '💡', '✨', '⭐'],
+  Actions: ['👉', '➡️', '📌', '🎯', '💪', '🙌', '👏', '🤝'],
+  Emotions: ['🤔', '😮', '🤯', '😱', '💭', '❤️', '💯', '🔑'],
+  Objects: ['📈', '📉', '💰', '🎁', '📚', '🧵', '📋', '✅'],
+}
 
-const HIGHLIGHT_COLOR_OPTIONS = [
-  { name: "Yellow", value: "#FACC15" },
-  { name: "Cyan", value: "#22D3EE" },
-  { name: "Green", value: "#4ADE80" },
-  { name: "Pink", value: "#F472B6" },
-  { name: "Orange", value: "#FB923C" },
-  { name: "Blue", value: "#60A5FA" },
-];
-
-export function ContentInput({ settings, onSettingsChange }: ContentInputProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const characterCount = settings.content.length;
-  const maxChars = 500;
-  const isNearLimit = characterCount > maxChars * 0.8;
-  const isOverLimit = characterCount > maxChars;
-  const isCreatorCard = settings.format === "creator-card";
+export function ContentInput({
+  settings,
+  onSettingsChange,
+}: ContentInputProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const characterCount = settings.content.length
+  const maxChars = 500
+  const isNearLimit = characterCount > maxChars * 0.8
+  const isOverLimit = characterCount > maxChars
+  const isCreatorCard = settings.format === 'creator-card'
 
   const insertEmoji = (emoji: string) => {
-    onSettingsChange({ content: settings.content + emoji });
-  };
+    onSettingsChange({ content: settings.content + emoji })
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        onSettingsChange({ creatorAvatar: dataUrl });
-      };
-      reader.readAsDataURL(file);
+        const dataUrl = event.target?.result as string
+        onSettingsChange({ creatorAvatar: dataUrl })
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const clearAvatar = () => {
-    onSettingsChange({ creatorAvatar: "" });
+    onSettingsChange({ creatorAvatar: '' })
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = ''
     }
-  };
+  }
 
   return (
     <div className="space-y-4">
@@ -70,15 +84,19 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
             <User className="h-4 w-4" />
             Profile Header
           </div>
-          
+
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">Display Name</label>
+              <label className="text-xs text-muted-foreground">
+                Display Name
+              </label>
               <input
                 type="text"
                 placeholder="Your Name"
                 value={settings.creatorName}
-                onChange={(e) => onSettingsChange({ creatorName: e.target.value })}
+                onChange={(e) =>
+                  onSettingsChange({ creatorName: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
               />
             </div>
@@ -88,7 +106,9 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
                 type="text"
                 placeholder="username"
                 value={settings.creatorHandle}
-                onChange={(e) => onSettingsChange({ creatorHandle: e.target.value })}
+                onChange={(e) =>
+                  onSettingsChange({ creatorHandle: e.target.value })
+                }
                 className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
               />
             </div>
@@ -96,8 +116,10 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
 
           {/* Avatar Section */}
           <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Profile Picture</label>
-            
+            <label className="text-xs text-muted-foreground">
+              Profile Picture
+            </label>
+
             {settings.creatorAvatar ? (
               <div className="flex items-center gap-3">
                 <img
@@ -134,7 +156,7 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
                   <Upload className="h-4 w-4 mr-2" />
                   Upload
                 </Button>
-                
+
                 {/* URL Input */}
                 <Popover>
                   <PopoverTrigger asChild>
@@ -150,7 +172,9 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
                         type="text"
                         placeholder="https://example.com/avatar.jpg"
                         value={settings.creatorAvatar}
-                        onChange={(e) => onSettingsChange({ creatorAvatar: e.target.value })}
+                        onChange={(e) =>
+                          onSettingsChange({ creatorAvatar: e.target.value })
+                        }
                         className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
                       />
                       <p className="text-xs text-muted-foreground">
@@ -166,8 +190,14 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z" fill="#1D9BF0"/>
-                <path d="M9.813 15.904L7.076 13.166c-.294-.293-.294-.768 0-1.06.293-.294.768-.294 1.06 0l2.03 2.03 4.908-4.908c.293-.293.768-.293 1.06 0 .294.294.294.769 0 1.061l-5.437 5.438c-.146.146-.338.22-.53.22-.19 0-.384-.074-.53-.22l-.824-.823z" fill="white"/>
+                <path
+                  d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z"
+                  fill="#1D9BF0"
+                />
+                <path
+                  d="M9.813 15.904L7.076 13.166c-.294-.293-.294-.768 0-1.06.293-.294.768-.294 1.06 0l2.03 2.03 4.908-4.908c.293-.293.768-.293 1.06 0 .294.294.294.769 0 1.061l-5.437 5.438c-.146.146-.338.22-.53.22-.19 0-.384-.074-.53-.22l-.824-.823z"
+                  fill="white"
+                />
               </svg>
               <span className="text-sm">Verified Badge</span>
             </div>
@@ -180,7 +210,7 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
               size="sm"
               className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
             >
-              {settings.showVerifiedBadge ? "On" : "Off"}
+              {settings.showVerifiedBadge ? 'On' : 'Off'}
             </Toggle>
           </div>
         </div>
@@ -223,7 +253,13 @@ export function ContentInput({ settings, onSettingsChange }: ContentInputProps) 
               </PopoverContent>
             </Popover>
             <Badge
-              variant={isOverLimit ? "destructive" : isNearLimit ? "secondary" : "outline"}
+              variant={
+                isOverLimit
+                  ? 'destructive'
+                  : isNearLimit
+                  ? 'secondary'
+                  : 'outline'
+              }
               className="text-xs"
             >
               {characterCount}/{maxChars}
@@ -240,51 +276,112 @@ Example: Most people think they need more time. They don't. They need more focus
         />
       </div>
 
-      {/* Highlight Text */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">
-          Highlight Text <span className="text-muted-foreground font-normal">(color a word/phrase)</span>
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="e.g. Plots of Land"
-            value={settings.highlightText}
-            onChange={(e) => onSettingsChange({ highlightText: e.target.value })}
-            className="flex-1 px-3 py-2 text-sm rounded-md border border-input bg-background"
-          />
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                className="w-10 h-10 rounded-md border border-input flex-shrink-0"
-                style={{ backgroundColor: settings.highlightColor }}
-              />
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2" align="end">
-              <div className="flex gap-1">
-                {HIGHLIGHT_COLOR_OPTIONS.map((color) => (
-                  <button
-                    key={color.value}
-                    onClick={() => onSettingsChange({ highlightColor: color.value })}
-                    className={`w-8 h-8 rounded-md border-2 transition-all ${
-                      settings.highlightColor === color.value
-                        ? "border-foreground scale-110"
-                        : "border-transparent"
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+      {/* Multi-Highlight Text */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-foreground">
+            Highlight Words{' '}
+            <span className="text-muted-foreground font-normal">
+              (color multiple phrases)
+            </span>
+          </label>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const newHighlight: HighlightEntry = {
+                text: '',
+                color:
+                  HIGHLIGHT_COLORS[
+                    settings.highlights.length % HIGHLIGHT_COLORS.length
+                  ].value,
+              }
+              onSettingsChange({
+                highlights: [...settings.highlights, newHighlight],
+              })
+            }}
+            className="h-8 text-xs"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add Highlight
+          </Button>
         </div>
+
+        {settings.highlights.length === 0 ? (
+          <div className="text-sm text-muted-foreground p-3 bg-secondary/30 rounded-md text-center">
+            Click &quot;Add Highlight&quot; to color specific words or phrases
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {settings.highlights.map((highlight, index) => (
+              <div key={index} className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  placeholder={`Word or phrase ${index + 1}`}
+                  value={highlight.text}
+                  onChange={(e) => {
+                    const updated = [...settings.highlights]
+                    updated[index] = { ...updated[index], text: e.target.value }
+                    onSettingsChange({ highlights: updated })
+                  }}
+                  className="flex-1 px-3 py-2 text-sm rounded-md border border-input bg-background"
+                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="w-10 h-10 rounded-md border border-input flex-shrink-0"
+                      style={{ backgroundColor: highlight.color }}
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2" align="end">
+                    <div className="flex gap-1">
+                      {HIGHLIGHT_COLORS.map((color) => (
+                        <button
+                          key={color.value}
+                          onClick={() => {
+                            const updated = [...settings.highlights]
+                            updated[index] = {
+                              ...updated[index],
+                              color: color.value,
+                            }
+                            onSettingsChange({ highlights: updated })
+                          }}
+                          className={`w-8 h-8 rounded-md border-2 transition-all ${
+                            highlight.color === color.value
+                              ? 'border-foreground scale-110'
+                              : 'border-transparent'
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    const updated = settings.highlights.filter(
+                      (_, i) => i !== index
+                    )
+                    onSettingsChange({ highlights: updated })
+                  }}
+                  className="h-10 w-10 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Subtitle */}
       <div className="space-y-2">
         <label className="text-sm font-medium text-foreground">
-          Subtitle <span className="text-muted-foreground font-normal">(optional)</span>
+          Subtitle{' '}
+          <span className="text-muted-foreground font-normal">(optional)</span>
         </label>
         <Textarea
           placeholder="Add context or a secondary line..."
@@ -309,10 +406,10 @@ Example: Most people think they need more time. They don't. They need more focus
             aria-label="Toggle CTA button"
             className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
           >
-            {settings.showCtaButton ? "On" : "Off"}
+            {settings.showCtaButton ? 'On' : 'Off'}
           </Toggle>
         </div>
-        
+
         {settings.showCtaButton && (
           <div className="flex items-center gap-2 pt-2">
             <span className="text-xs text-muted-foreground">Size:</span>
@@ -323,8 +420,8 @@ Example: Most people think they need more time. They don't. They need more focus
                   onClick={() => onSettingsChange({ ctaSize: size })}
                   className={`px-3 py-1 text-xs rounded-md transition-all ${
                     settings.ctaSize === size
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary hover:bg-secondary/80"
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-secondary hover:bg-secondary/80'
                   }`}
                 >
                   {CTA_SIZES[size].name}
@@ -349,7 +446,7 @@ Example: Most people think they need more time. They don't. They need more focus
           aria-label="Toggle comment pointer"
           className="data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
         >
-          {settings.showCommentPointer ? "On" : "Off"}
+          {settings.showCommentPointer ? 'On' : 'Off'}
         </Toggle>
       </div>
 
@@ -361,11 +458,13 @@ Example: Most people think they need more time. They don't. They need more focus
           <Textarea
             placeholder="👇 Read more in comments"
             value={settings.commentPointerText}
-            onChange={(e) => onSettingsChange({ commentPointerText: e.target.value })}
+            onChange={(e) =>
+              onSettingsChange({ commentPointerText: e.target.value })
+            }
             className="min-h-[50px] resize-none text-sm"
           />
         </div>
       )}
     </div>
-  );
+  )
 }

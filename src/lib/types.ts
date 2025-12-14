@@ -23,7 +23,13 @@ export type GradientPreset =
     | "coral"
     | "slate";
 
-export type Platform = "facebook" | "linkedin" | "twitter" | "instagram" | "instagram-story";
+export type Platform = "facebook" | "facebook-portrait" | "facebook-square" | "linkedin" | "twitter" | "instagram" | "instagram-story";
+
+// Highlight entry for multi-highlight support
+export interface HighlightEntry {
+    text: string;
+    color: string;
+}
 
 export type CtaSize = "sm" | "md" | "lg";
 
@@ -41,9 +47,23 @@ export const PLATFORM_DIMENSIONS: Record<Platform, PlatformDimensions> = {
     facebook: {
         width: 1200,
         height: 630,
-        name: "Facebook Post",
+        name: "Facebook Landscape",
         aspectRatio: "1.91:1",
         description: "Optimized for Facebook feed posts and link shares",
+    },
+    "facebook-portrait": {
+        width: 1080,
+        height: 1350,
+        name: "Facebook Portrait",
+        aspectRatio: "4:5",
+        description: "Tall portrait format for maximum feed visibility",
+    },
+    "facebook-square": {
+        width: 1080,
+        height: 1080,
+        name: "Facebook Square",
+        aspectRatio: "1:1",
+        description: "Square format for versatile Facebook posts",
     },
     linkedin: {
         width: 1200,
@@ -96,6 +116,8 @@ export interface PostSettings {
     ctaSize: CtaSize;
     highlightText: string;
     highlightColor: string;
+    // Multi-highlight support
+    highlights: HighlightEntry[];
 }
 
 export const DEFAULT_SETTINGS: PostSettings = {
@@ -119,6 +141,8 @@ export const DEFAULT_SETTINGS: PostSettings = {
     ctaSize: "md",
     highlightText: "",
     highlightColor: "#FACC15",
+    // Multi-highlight support - empty by default
+    highlights: [],
 };
 
 export const FORMAT_INFO: Record<

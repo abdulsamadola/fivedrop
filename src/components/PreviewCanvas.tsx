@@ -292,30 +292,60 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       return Math.min(scaledHeight + 20, 500)
     }, [dimensions.height, previewScale])
 
-    // Apply highlight to text
+    // Apply multiple highlights to text
     const applyHighlight = useCallback(
       (text: string): React.ReactNode => {
-        if (!settings.highlightText || !text.includes(settings.highlightText)) {
+        // Filter out empty highlights
+        const activeHighlights = settings.highlights.filter(
+          (h) => h.text.trim() !== ''
+        )
+
+        if (activeHighlights.length === 0) {
           return text
         }
 
-        const escapedHighlight = settings.highlightText.replace(
-          /[.*+?^${}()|[\]\\]/g,
-          '\\$&'
+        // Build a combined regex pattern for all highlights
+        const escapedPatterns = activeHighlights.map((h) =>
+          h.text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         )
-        const parts = text.split(new RegExp(`(${escapedHighlight})`, 'gi'))
+        const combinedPattern = new RegExp(
+          `(${escapedPatterns.join('|')})`,
+          'gi'
+        )
 
-        return parts.map((part, i) =>
-          part.toLowerCase() === settings.highlightText.toLowerCase() ? (
-            <span key={i} style={{ color: settings.highlightColor }}>
-              {part}
-            </span>
-          ) : (
-            part
+        const parts = text.split(combinedPattern)
+
+        return parts.map((part, i) => {
+          // Check if this part matches any highlight
+          const matchedHighlight = activeHighlights.find(
+            (h) => h.text.toLowerCase() === part.toLowerCase()
           )
-        )
+
+          if (matchedHighlight) {
+            return (
+              <span key={i} style={{ color: matchedHighlight.color }}>
+                {part}
+              </span>
+            )
+          }
+          return part
+        })
       },
-      [settings.highlightText, settings.highlightColor]
+      [settings.highlights]
+    )
+
+    // Apply highlights while preserving line breaks
+    const applyHighlightWithLineBreaks = useCallback(
+      (text: string): React.ReactNode => {
+        const lines = text.split('\n')
+        return lines.map((line, lineIndex) => (
+          <span key={lineIndex}>
+            {applyHighlight(line)}
+            {lineIndex < lines.length - 1 && <br />}
+          </span>
+        ))
+      },
+      [applyHighlight]
     )
 
     // Format content based on format type
@@ -358,13 +388,20 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               >
                 🧵
               </span>
-              <span>{applyHighlight(settings.content)}</span>
+              <span>{applyHighlightWithLineBreaks(settings.content)}</span>
             </div>
           )
         default:
-          return applyHighlight(settings.content)
+          return applyHighlightWithLineBreaks(settings.content)
       }
-    }, [settings.content, settings.format, applyHighlight, fontSize, spacing])
+    }, [
+      settings.content,
+      settings.format,
+      applyHighlight,
+      applyHighlightWithLineBreaks,
+      fontSize,
+      spacing,
+    ])
 
     return (
       <div ref={containerRef} className="w-full flex flex-col items-center">
@@ -513,7 +550,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                         marginTop: `${spacing.gap.medium}px`,
                       }}
                     >
-                      {applyHighlight(settings.subtitle)}
+                      {applyHighlightWithLineBreaks(settings.subtitle)}
                     </div>
                   )}
                 </div>
@@ -546,7 +583,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                         <div
                           className="rounded-full flex items-center justify-center"
                           style={{
-                            backgroundColor: settings.highlightColor,
+                            backgroundColor:
+                              settings.highlights.length > 0
+                                ? settings.highlights[0].color
+                                : settings.highlightColor,
                             width: `${elementSizes.cta}px`,
                             height: `${elementSizes.cta}px`,
                           }}
